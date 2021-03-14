@@ -1,6 +1,9 @@
 <template>
-  <div>
-  </div>
+<v-container fluid>
+ 
+    <h3>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ea modi expedita iste id tempore repudiandae sint beatae exercitationem deserunt, corporis dolor labore! Vel qui atque, optio accusantium quas voluptatibus labore!</h3>
+   
+  </v-container>
 </template>
 
 <script>

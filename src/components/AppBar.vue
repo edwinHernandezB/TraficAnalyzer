@@ -1,19 +1,24 @@
 <template>
 <v-container>
-    <v-app-bar app 
-      >
-        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-       
-          <v-img
-    class="mx-2"
-    src="../assets/TraficAnalyzer_tr_logo.png"
-    max-height="200"
-    max-width="200"
-    contain
-  ></v-img>
+    <v-app-bar app clipped-left >
+     
+     
+        <v-img
+        class="mx-2"
+        src="../assets/TraficAnalyzer_tr_logo.png"
+        max-height="200"
+        max-width="200"
+        ></v-img>
+        
+        <v-spacer></v-spacer>
 
+        <v-btn icon @click="gitRepository">
+            <v-icon dark large>mdi-github</v-icon>
+        </v-btn>
+        
     </v-app-bar>
-    <NavDrawer :drawerActive="drawer" @clickOutside="onClickOutside"></NavDrawer>
+    
+    <NavDrawer></NavDrawer>
   
 </v-container>
 </template>
@@ -27,12 +32,11 @@ export default {
     },
     data() {
         return {
-            drawer: false
         }
     },
     methods:{
-        onClickOutside: function(value){
-            this.drawer = value
+        gitRepository: function(){
+           window.open("https://github.com/edwinHernandezB/TraficAnalyzer", "_blank"); 
         }
     }
 }
