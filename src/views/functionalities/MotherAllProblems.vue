@@ -1,6 +1,6 @@
 <template>
 <v-container fluid>
-  <h1>This is the about page</h1>   
+  <h1>This is the MotherAllProblems view</h1>   
   </v-container>
 </template>
 
@@ -8,9 +8,11 @@
 // @ is an alias to /src
 
 export default {
-  name: 'About',
+  name: 'MotherAllProblems',
   components: {
     
   }
 }
 </script>
+
+

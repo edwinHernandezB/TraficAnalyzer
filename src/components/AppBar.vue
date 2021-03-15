@@ -4,8 +4,7 @@
      
      
         <v-img
-        class="mx-2"
-        src="../assets/TraficAnalyzer_tr_logo.png"
+        src="../assets/TraficAnalyzer_izq_logo.png"
         max-height="200"
         max-width="200"
         ></v-img>
@@ -17,7 +16,6 @@
         </v-btn>
         
     </v-app-bar>
-    
     <NavDrawer></NavDrawer>
   
 </v-container>

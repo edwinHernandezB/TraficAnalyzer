@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppBar></AppBar>
-    <v-main>
+    <v-main style="padding: 20px 0px 0px 56px;">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -20,3 +20,4 @@ export default {
   }),
 };
 </script>
+
