@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppBar></AppBar>
-    <v-main style="padding: 20px 0px 0px 56px;">
+    <v-main style="padding: 15px 0px 0px 56px;">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -21,3 +21,9 @@ export default {
 };
 </script>
 
+<style >
+.vAppBar{
+  position:fixed; 
+  top:40px;
+}
+</style>

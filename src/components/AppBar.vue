@@ -1,13 +1,15 @@
 <template>
 <v-container>
-    <v-app-bar app clipped-left >
+    <v-app-bar app clipped-left elevation="0" height="40">
      
-     
-        <v-img
-        src="../assets/TraficAnalyzer_izq_logo.png"
-        max-height="200"
-        max-width="200"
-        ></v-img>
+        <router-link to="/">
+            <v-img class="vImg"
+            src="../assets/TraficAnalyzer_izq_logo.png"
+            max-height="200"
+            max-width="200"
+            @click=""
+            ></v-img>
+        </router-link>
         
         <v-spacer></v-spacer>
 
@@ -15,6 +17,9 @@
             <v-icon dark large>mdi-github</v-icon>
         </v-btn>
         
+    </v-app-bar>
+    <v-app-bar  clipped class="vAppBar" height="40" >
+        <h3>Home</h3>
     </v-app-bar>
     <NavDrawer></NavDrawer>
   
@@ -39,3 +44,12 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+
+.vAppBar{
+  position:fixed; 
+  top:40px;
+}
+
+</style>l

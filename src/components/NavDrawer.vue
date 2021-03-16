@@ -1,7 +1,6 @@
 <template>
   <v-container >
-    <v-navigation-drawer app absolute permanent expand-on-hover clipped class="vNavDrawer">
-      
+    <v-navigation-drawer app absolute permanent expand-on-hover style="top:81px;" clipped class="vNavDrawer">
       <!-- List of functionalities and Simulations grouped-->
       <v-list dense>
 
@@ -48,27 +47,27 @@ export default {
     name: 'NavDrawer',
     data () {
       return {
-        about:  { title: 'About', icon: 'mdi-information-outline', action: 'about' },
+        about:  { title: 'Información', icon: 'mdi-information-outline', action: 'about' },
         toolList: [
             {
                 groupIcon: 'mdi-hammer-wrench',
                 components: [
-                    { title: 'Packet Capture', icon: 'mdi-mail', action: 'PacketCapture' },
-                    { title: 'Check connection to host', icon: 'mdi-table-tennis', action: 'CheckConn' },
-                    { title: 'Status of packet paths', icon: 'mdi-map-marker-multiple', action: 'PacketPath' },
-                    { title: 'Find devices in network', icon: 'mdi-lan', action: 'FindDevices' },
-                    { title: 'Active Sockets', icon: 'mdi-lan-connect',action: 'ActiveSockets' },
-                    { title: 'Statistics', icon: 'mdi-chart-bar', action: 'Statistics' },
+                    { title: 'Captura de paquetes', icon: 'mdi-mail', action: 'PacketCapture' },
+                    { title: 'Estado de conexión', icon: 'mdi-table-tennis', action: 'CheckConn' },
+                    { title: 'Ruta de paquetes', icon: 'mdi-map-marker-multiple', action: 'PacketPath' },
+                    { title: 'Dispositivos en la red', icon: 'mdi-lan', action: 'FindDevices' },
+                    { title: 'Sockets activos', icon: 'mdi-lan-connect',action: 'ActiveSockets' },
+                    { title: 'Estadisticas', icon: 'mdi-chart-bar', action: 'Statistics' },
                 ],
-                groupTitle: 'Utilities',
+                groupTitle: 'Utilidades',
             },
             {
                 groupIcon: 'mdi-cube',
                 components: [
-                    { title: 'TCP Pill Concepts', icon: 'mdi-pill', action: 'TCPconcepts' },
+                    { title: 'Pildora de conceptos TCP', icon: 'mdi-pill', action: 'TCPconcepts' },
                     { title: 'The Mother Of All Problems', icon: 'mdi-school', action: 'MotherAllProblems' },
                 ],
-                groupTitle: 'Simulations'
+                groupTitle: 'Simulaciones'
             },
         ],
       }

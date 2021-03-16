@@ -1,7 +1,16 @@
 <template>
 <v-container fluid>
-  <h1>This is the CheckConn</h1>   
-  </v-container>
+  <v-app-bar  clipped class="vAppBar" height="40" >
+    <h3>Verificar conexión entre dos máquinas</h3>
+  </v-app-bar>
+
+  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
+  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
+  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
+  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
+  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
+ 
+</v-container>
 </template>
 
 <script>
@@ -14,3 +23,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.vAppBar{
+  position:fixed; 
+  top:40px;
+}
+
+</style>

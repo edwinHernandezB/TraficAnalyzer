@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-
+import './Style/main.css'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
 // //Grphic Design Import Bootstrap an BootstrapVue CSS files 
