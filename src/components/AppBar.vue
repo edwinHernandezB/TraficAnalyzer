@@ -7,7 +7,6 @@
             src="../assets/TraficAnalyzer_izq_logo.png"
             max-height="200"
             max-width="200"
-            @click=""
             ></v-img>
         </router-link>
         

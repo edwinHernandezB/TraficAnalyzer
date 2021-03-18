@@ -75,7 +75,7 @@ export default {
     methods:{
       call(action) {
         //@click="call(component.action)"
-
+      
       console.log(action);
       },
     },    
