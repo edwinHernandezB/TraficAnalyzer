@@ -9,6 +9,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@mdi/font": "5.9.55",
+    "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
     "child-process-promise": "^2.2.1",

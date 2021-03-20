@@ -13,7 +13,7 @@
         <v-col cols="12" md="2">
           <v-text-field v-model="IP" :rules="rulesIP" :counter="15" label="IP de host a comprobar" required></v-text-field>
         </v-col>
-
+        
         <v-col cols="12" md="2">
           <v-text-field type="number" v-model="totalPackage" :rules="packageRules" label="nº paquetes" required ></v-text-field>
         </v-col>
@@ -42,8 +42,10 @@
 
 <script>
 // @ is an alias to /src
-import { exec, spawn } from 'child_process';
+import axios from 'axios'
+
 export default {
+  
   name: 'CheckConn',
   data() {
     return {
@@ -60,21 +62,31 @@ export default {
   },
   methods: {
     ejecutar: function(){
-      console.log('hola');
-     const ls = spawn('echo', ['spawn', 'success!']);
-
-        ls.stdout.on('data', (data) => {
-          console.log(`SPAWN: stdout: ${data}`);
-          this.result = data;
-        });
-
-        ls.stderr.on('data', (data) => {
-          console.log(`SPAWN: stderr: ${data}`);
-        });
-
-        ls.on('close', (code) => {
-          console.log(`SPAWN: child process exited with code ${code}`);
-        });
+       axios
+      .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage)
+      .then(response => {
+        var str = ''
+         str += response.data.toString();
+         /*str = str.split('\n')
+         console.log(str);*/
+         if(str.includes('Error has ocurred'))
+         {
+           console.log('error en ejecutar comando');
+         }else{
+           var lines = str.split("\n");
+           console.log(lines);
+         }
+        // Flush out line by line.
+        /*var lines = str.split("\n");
+        for(var i in lines) {
+            if(i == lines.length - 1) {
+                str = lines[i];
+            } else{
+                // Note: The double-newline is *required*
+                this.value += lines[i] + "\n\n";
+            }
+        }*/
+    })
     }
   },
   components: {

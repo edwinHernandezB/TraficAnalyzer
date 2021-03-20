@@ -17,7 +17,6 @@ import '@mdi/font/css/materialdesignicons.css'
 Vue.use(BootstrapVue)
 // BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
-
 Vue.config.productionTip = false
 
 new Vue({
