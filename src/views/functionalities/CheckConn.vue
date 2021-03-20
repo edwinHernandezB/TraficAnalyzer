@@ -20,7 +20,7 @@
       
         <!--Button Ejecutar y Finalizar-->
         <v-btn color="success" class="mt-6 ml-5 " :disabled="!isCorrectIP" @click="ejecutar"> Ejecutar </v-btn>
-        <v-btn color="error" class="mt-6 ml-5" > Finalizar </v-btn>
+        <v-btn color="error" class="mt-6 ml-5" :disabled="!buttonFinalize" @click="finalizar" > Finalizar </v-btn>
       
       </v-row>
       
@@ -36,21 +36,42 @@
           El número de paquetes máximo a enviar son 10.
         </div>
       </v-alert>
+
+      <!-- Barra de progreso de solicitud -->
+      <v-progress-linear :active="!isFinishPing"
+            color="info accent-4"
+            indeterminate
+            rounded
+            height="6"
+          ></v-progress-linear>
+
+      <!-- Alerta de cancelación de proceso -->
+      <v-alert :value="successProcess" type="success"> El host con IP {{this.IP}} está activo y respondiendo correctamente.</v-alert>
+
+      <!-- Alerta de cancelación de proceso -->
+      <v-alert :value="alert" type="error"> Proceso cancelado.</v-alert>
+      {{rtt}}
   </v-container>
 </template>
 
 <script>
-// @ is an alias to /src
+
 import axios from 'axios'
 
+
 export default {
-  
   name: 'CheckConn',
   data() {
     return {
       isCorrectIP: false,
       isCorrectCount: false,
+      buttonFinalize: false,
+      isFinishPing: true,
+      cancelSource: null,
+      successProcess: false,
+      alert: false,
       IP: '127.0.0.1',
+      rtt: [],
       totalPackage: '',
       rulesIP:[
          v => !!v || 'IP es requerida',
@@ -66,38 +87,67 @@ export default {
   },
   methods: {
     ejecutar: function(){
+      this.cancelSource = axios.CancelToken.source();
+      this.buttonFinalize = !this.buttonFinalize
+      this.isFinishPing = !this.isFinishPing
        axios
-      .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage)
+      .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage, {cancelToken: this.cancelSource.token})
       .then(response => {
         var str = ''
-         str += response.data.toString();
-         /*str = str.split('\n')
-         console.log(str);*/
-         if(str.includes('Error has ocurred'))
-         {
-           console.log('error en ejecutar comando');
-         }else{
-           var lines = str.split("\n");
-           console.log(lines);
-         }
-        // Flush out line by line.
-        /*var lines = str.split("\n");
-        for(var i in lines) {
-            if(i == lines.length - 1) {
-                str = lines[i];
-            } else{
-                // Note: The double-newline is *required*
-                this.value += lines[i] + "\n\n";
-            }
-        }*/
-    })
+        str += response.data.toString();
+        if(str.includes('Error has ocurred'))
+        {
+          console.log('error en ejecutar comando');
+        }else{
+          //this.cancelSource = null;
+          var lines = str.split("\n");
+          //console.log('lines: ' + lines);
+          //var time = []
+          this.rtt = []
+          for (let index = 1; index <= this.totalPackage; index++) {
+            //time.push(lines[index].split('time=').pop().split(' ')[0]);
+            this.rtt.push(lines[index].split('time=').pop().split(' ')[0]);
+          
+          }
+          
+          this.isFinishPing = !this.isFinishPing
+          this.buttonFinalize = !this.buttonFinalize
+          this.successProcess = !this.successProcess
+          //console.log('RTT: ' + time);
+          console.log('RTT: ' + this.rtt);
+          var hideSuccessProcesss = (()=>{
+            setTimeout(()=>{
+              this.successProcess=false
+            },4000)
+          })()
+        }   
+      })
+    },
+    finalizar: function(){
+     // this.$forceUpdate();ç
+      if (this.cancelSource) {
+        
+        this.cancelSource.cancel('Stop active process');
+        console.log('cancel request done');
+        
+        this.isFinishPing = !this.isFinishPing
+        this.buttonFinalize = !this.buttonFinalize
+        
+        this.alert = true
+        setTimeout(()=>{
+          this.alert=false
+        },3000)
+      }
     }
   },
   components: {
     
   },
+  watch: {
+    
+  }
  
-}//^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$ --> match IPs
+}
 
 </script>
 

@@ -9,14 +9,15 @@ app.use(cors());
 app.use(express.static(__dirname));
 
 app.get('/ping', function(req, res){
-    exec('ping -n '+req.query.count +' '+ req.query.ip, (error, stdout, stderr) => {
+    exec('ping -c '+req.query.count +' '+ req.query.ip, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           res.end(`Error has ocurred: ${error}`)
           return;
         }else{
             console.log('body: ' + req.query.ip);
-
+            res.content
+            res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
             res.write(stdout)
             res.end()
             console.log(`stdout: ${stdout}`);
