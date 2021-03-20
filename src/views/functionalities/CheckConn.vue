@@ -11,7 +11,7 @@
         
         <!--IP de host a comprobar y Número de paquetes a enviar-->
         <v-col cols="12" md="2">
-          <v-text-field v-model="IP" :rules="rulesIP" :counter="15" label="IP de host a comprobar" required></v-text-field>
+          <v-text-field v-model="IP" :rules="rulesIP"  label="IP de host" required></v-text-field>
         </v-col>
         
         <v-col cols="12" md="2">
@@ -19,7 +19,7 @@
         </v-col>
       
         <!--Button Ejecutar y Finalizar-->
-        <v-btn color="success" class="mt-6 ml-5 " @click="ejecutar"> Ejecutar </v-btn>
+        <v-btn color="success" class="mt-6 ml-5 " :disabled="!isCorrectIP" @click="ejecutar"> Ejecutar </v-btn>
         <v-btn color="error" class="mt-6 ml-5" > Finalizar </v-btn>
       
       </v-row>
@@ -33,10 +33,9 @@
         
         <div>
           Se utiliza la utilidad de <strong>Ping</strong> para detectar si una máquina esta disponible o no a partir de envio de paquetes ICMP.
-          Si no se indica un número de paquetes a enviar, por defecto se enviaran 10 paquetes.
+          El número de paquetes máximo a enviar son 10.
         </div>
       </v-alert>
-      {{value}}
   </v-container>
 </template>
 
@@ -49,14 +48,19 @@ export default {
   name: 'CheckConn',
   data() {
     return {
-      value: '',
-      IP: '',
+      isCorrectIP: false,
+      isCorrectCount: false,
+      IP: '127.0.0.1',
       totalPackage: '',
       rulesIP:[
          v => !!v || 'IP es requerida',
+         v => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(v) || 'Formato de IP incorrecto',
+         v => { if(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(v)){ this.isCorrectIP = true}else { this.isCorrectIP = false} return true }
       ],
       packageRules: [
-        v => v > 0 || 'El mínimo debe ser 1 paquete'
+        v => {if(v < 1){this.totalPackage = 1} return true},
+        v => {if(v > 10){this.totalPackage = 10} return true},
+        v => {if(v <= 10 && v >= 1 ){this.isCorrectCount = true} else{ this.isCorrectCount = false} return true}
       ],
     }
   },
@@ -91,7 +95,8 @@ export default {
   },
   components: {
     
-  }
+  },
+ 
 }//^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$ --> match IPs
 
 </script>
