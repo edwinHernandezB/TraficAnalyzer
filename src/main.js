@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import VueApexCharts from 'vue-apexcharts'
 import './Style/main.css'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
@@ -17,6 +18,10 @@ import '@mdi/font/css/materialdesignicons.css'
 Vue.use(BootstrapVue)
 // BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
+
+Vue.use(VueApexCharts)
+Vue.component('apexchart', VueApexCharts)
+
 Vue.config.productionTip = false
 
 new Vue({

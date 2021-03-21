@@ -27,7 +27,7 @@
     </v-container>
   </v-form>
 
-      <!-- Alert -->
+      <!-- Alert Info-->
       <v-alert text color="info">
         <h4> Información sobre esta funcionalidad </h4>
         
@@ -45,34 +45,103 @@
             height="6"
           ></v-progress-linear>
 
-      <!-- Alerta de cancelación de proceso -->
+      <!-- Alerta de proceso finalizado correctamente -->
       <v-alert :value="successProcess" type="success"> El host con IP {{this.IP}} está activo y respondiendo correctamente.</v-alert>
 
       <!-- Alerta de cancelación de proceso -->
       <v-alert :value="alert" type="error"> Proceso cancelado.</v-alert>
-      {{rtt}}
+
+      <!-- Alerta de proceso Inactivo -->
+      <v-alert :value="errorPing" type="error"> Ha ocurrido un error con el host con IP {{this.IP}}. Comprueba si la IP es correcta, si lo es, es posible que el 
+        host no este activo. La causa puede ser debido a diferentes problemas, algunos pueden ser:
+        <ul>
+          <li>El host está apagado.</li>
+          <li>No hay conexión a Internet.</li>
+          <li>Configuración de firewall por parte del host destino u origen.</li>
+          <li>Un host intermedio del camino de entrega utilizado no está activo. En este caso, puedes comprobar con un <b>traceroute</b> para conocer este host </li>
+        </ul>
+      </v-alert>
+      
+      <!-- Estadisticas de ping -->
+      <v-container fluid v-if="showStatistics">
+        <v-row>
+          <v-col cols="12" md="4">
+            <h3 style="margin-left: 100px;">RTT de paquetes enviados</h3>
+            <apexchart ref="rttChart" width="500" type="line" :options="charLineOptions" :series="series"></apexchart>
+          </v-col>      
+
+          <v-col cols="12" md="3">
+            <apexchart style=" margin-top: 80px;" ref="donutPackage" width="380" type="donut" :options="optionsPackage" :series="seriesPackage"></apexchart>
+          </v-col>
+        </v-row>
+
+        <v-container fluid>
+        <v-row>
+        <v-col cols="12" md="2">
+          <table >
+            <tr>
+              <td>
+                <th>RTT</th>
+                <tr v-for="item in rtt.stats.title" :key="item"> {{item}}</tr>
+              </td>
+                
+              <td>
+                <th>VALUE</th>
+                <tr v-for="item in stats" :key="item"> {{item}} ms</tr>
+              </td>
+            </tr>
+          </table>
+        </v-col>  
+        <!-- Alert Info-->
+        <v-col cols="12" md="8">     
+             <v-alert text color="info">
+          <h4> Sobre el RTT: </h4>
+          <div>
+            RTT es el tiempo que tarda un paquete en ir y volver al origen habiendo pasado por el destino, 
+            este intervalo de tiempo es importante ya que podemos determinar aquella latencia de comunicación
+            entre un punto físico y otro. 
+            El RTT no solo determina la latencia de distancia sino que también puede deberse a otros factores como 
+            tener un tráfico alto en alguna red por donde pasa el paquete, la velocidad de una conexión en un punto, 
+            cuello de botella en caso de ser un servidor, etc.
+          </div>
+        </v-alert>
+        </v-col>           
+        </v-row>
+
+       
+      
+      </v-container>
+    </v-container>
+        
   </v-container>
 </template>
 
 <script>
 
 import axios from 'axios'
+import VueApexCharts from 'vue-apexcharts'
 
 
 export default {
   name: 'CheckConn',
+  components: {
+    apexcharts: VueApexCharts,
+  },
   data() {
     return {
-      isCorrectIP: false,
-      isCorrectCount: false,
+      isCorrectIP: true,
       buttonFinalize: false,
+      errorPing: false,
       isFinishPing: true,
       cancelSource: null,
       successProcess: false,
+      showStatistics: false,
       alert: false,
       IP: '127.0.0.1',
-      rtt: [],
+      rtt: { rtt:[], stats: {title:['Mínimo', 'Media', 'Máximo', 'Desviación'], value: []} },
       totalPackage: '',
+
+      //----------Form Rules------------------
       rulesIP:[
          v => !!v || 'IP es requerida',
          v => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(v) || 'Formato de IP incorrecto',
@@ -81,72 +150,111 @@ export default {
       packageRules: [
         v => {if(v < 1){this.totalPackage = 1} return true},
         v => {if(v > 10){this.totalPackage = 10} return true},
-        v => {if(v <= 10 && v >= 1 ){this.isCorrectCount = true} else{ this.isCorrectCount = false} return true}
       ],
+      //---------Line Chart RTT---------------
+      
+      charLineOptions: {
+        chart: {
+          id: 'packages RTT'
+        },
+        xaxis: {
+          title: {
+          text: 'Paquetes',  
+        },  
+          categories: []
+        },
+
+        yaxis: [
+        {
+          title: {
+            text: "Milisegundos"
+          },
+        },],
+      },
+      
+      series: [{
+        name: 'RTT',
+        data: []
+      }],
+      stats : [],
+      //---------Donut Chart Packages---------------
+      optionsPackage: {
+        labels: ['Total entregados', 'Total Perdidos']
+      },
+      seriesPackage: [1,2,3]
     }
   },
   methods: {
     ejecutar: function(){
       this.cancelSource = axios.CancelToken.source();
-      this.buttonFinalize = !this.buttonFinalize
-      this.isFinishPing = !this.isFinishPing
-       axios
+      this.changeState()
+
+      axios
       .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage, {cancelToken: this.cancelSource.token})
       .then(response => {
         var str = ''
         str += response.data.toString();
+
         if(str.includes('Error has ocurred'))
         {
-          console.log('error en ejecutar comando');
+          this.finalizar()
+          this.errorPing = !this.errorPing
+
+          setTimeout(()=>{ this.errorPing=false },15000)
+
         }else{
-          //this.cancelSource = null;
           var lines = str.split("\n");
-          //console.log('lines: ' + lines);
-          //var time = []
-          this.rtt = []
+          this.rtt.rtt = []
+          this.rtt.stats.value = []
+        
+          var totalPackage = str.split('---').pop()
+          totalPackage = totalPackage.toString()
+          totalPackage = totalPackage.match(/\d+/g).map(Number).slice(0, 2);
+          
+          var rttStats = str.split('mdev = ').pop().split('/')
+          this.stats = rttStats
+
+          if(totalPackage[0] == totalPackage[1]){ this.seriesPackage = totalPackage.slice(0, 1)} 
+          else { this.seriesPackage = totalPackage.slice(0, 2)}
+
           for (let index = 1; index <= this.totalPackage; index++) {
-            //time.push(lines[index].split('time=').pop().split(' ')[0]);
-            this.rtt.push(lines[index].split('time=').pop().split(' ')[0]);
-          
+            this.rtt.rtt.push(lines[index].split('time=').pop().split(' ')[0]);
+
           }
-          
-          this.isFinishPing = !this.isFinishPing
-          this.buttonFinalize = !this.buttonFinalize
+
+          this.changeState()
           this.successProcess = !this.successProcess
-          //console.log('RTT: ' + time);
-          console.log('RTT: ' + this.rtt);
-          var hideSuccessProcesss = (()=>{
-            setTimeout(()=>{
-              this.successProcess=false
-            },4000)
-          })()
+          if(!this.showStatistics) { this.showStatistics = !this.showStatistics}
+
+          this.$refs.rttChart.updateSeries([{
+                        name: 'RTT',
+                        data: this.rtt.rtt,
+          }])
+        
+          
+          setTimeout(()=>{ this.successProcess=false },4000)
         }   
       })
     },
     finalizar: function(){
-     // this.$forceUpdate();ç
       if (this.cancelSource) {
         
         this.cancelSource.cancel('Stop active process');
         console.log('cancel request done');
-        
-        this.isFinishPing = !this.isFinishPing
-        this.buttonFinalize = !this.buttonFinalize
+        this.changeState()
         
         this.alert = true
-        setTimeout(()=>{
-          this.alert=false
-        },3000)
+        setTimeout(()=>{ this.alert=false },3000)
       }
-    }
+    },
+    changeState(){
+      this.isCorrectIP = !this.isCorrectIP
+      this.isFinishPing = !this.isFinishPing
+      this.buttonFinalize = !this.buttonFinalize
+    },
+   
   },
-  components: {
-    
-  },
-  watch: {
-    
-  }
- 
+
 }
 
 </script>
@@ -157,5 +265,10 @@ export default {
   top:40px;
 }
 
+td, th, tr {
+  border: black 1px solid;
+  padding: 1px;
+  margin: 20px;
+}
 
 </style>
