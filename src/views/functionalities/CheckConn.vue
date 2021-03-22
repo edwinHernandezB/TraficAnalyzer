@@ -46,13 +46,13 @@
           ></v-progress-linear>
 
       <!-- Alerta de proceso finalizado correctamente -->
-      <v-alert :value="successProcess" type="success"> El host con IP {{this.IP}} está activo y respondiendo correctamente.</v-alert>
+      <v-alert :value="successProcess" type="success"> El host con IP {{this.hostIP}} está activo y respondiendo correctamente.</v-alert>
 
       <!-- Alerta de cancelación de proceso -->
       <v-alert :value="alert" type="error"> Proceso cancelado.</v-alert>
 
       <!-- Alerta de proceso Inactivo -->
-      <v-alert :value="errorPing" type="error"> Ha ocurrido un error con el host con IP {{this.IP}}. Comprueba si la IP es correcta, si lo es, es posible que el 
+      <v-alert :value="errorPing" type="error"> Ha ocurrido un error con el host con IP {{this.hostIP}}. Comprueba si la IP es correcta, si lo es, es posible que el 
         host no este activo. La causa puede ser debido a diferentes problemas, algunos pueden ser:
         <ul>
           <li>El host está apagado.</li>
@@ -82,12 +82,12 @@
             <tr>
               <td>
                 <th>RTT</th>
-                <tr v-for="item in rtt.stats.title" :key="item"> {{item}}</tr>
+                <tr v-for="item in rtt.stats.title" :key="item.id"> {{item}}</tr>
               </td>
                 
               <td>
                 <th>VALUE</th>
-                <tr v-for="item in stats" :key="item"> {{item}} ms</tr>
+                <tr v-for="item in stats" :key="item.id"> {{item}} ms</tr>
               </td>
             </tr>
           </table>
@@ -127,6 +127,9 @@ export default {
   components: {
     apexcharts: VueApexCharts,
   },
+  updated(){
+    this.updateChartLineSeries()  
+  },
   data() {
     return {
       isCorrectIP: true,
@@ -138,6 +141,7 @@ export default {
       showStatistics: false,
       alert: false,
       IP: '127.0.0.1',
+      hostIP: '',
       rtt: { rtt:[], stats: {title:['Mínimo', 'Media', 'Máximo', 'Desviación'], value: []} },
       totalPackage: '',
 
@@ -181,11 +185,13 @@ export default {
       optionsPackage: {
         labels: ['Total entregados', 'Total Perdidos']
       },
-      seriesPackage: [1,2,3]
+      seriesPackage: []
     }
   },
+  
   methods: {
     ejecutar: function(){
+      
       this.cancelSource = axios.CancelToken.source();
       this.changeState()
 
@@ -198,8 +204,8 @@ export default {
         if(str.includes('Error has ocurred'))
         {
           this.finalizar()
+          this.hostIP = this.IP
           this.errorPing = !this.errorPing
-
           setTimeout(()=>{ this.errorPing=false },15000)
 
         }else{
@@ -212,7 +218,10 @@ export default {
           totalPackage = totalPackage.match(/\d+/g).map(Number).slice(0, 2);
           
           var rttStats = str.split('mdev = ').pop().split('/')
+          rttStats[rttStats.length-1] = rttStats[rttStats.length-1].slice(0, -4)
           this.stats = rttStats
+
+          this.hostIP = this.IP
 
           if(totalPackage[0] == totalPackage[1]){ this.seriesPackage = totalPackage.slice(0, 1)} 
           else { this.seriesPackage = totalPackage.slice(0, 2)}
@@ -222,17 +231,14 @@ export default {
 
           }
 
+          this.updateChartLineSeries();
           this.changeState()
           this.successProcess = !this.successProcess
+
+          setTimeout(()=>{ this.successProcess=false },5000)
+
           if(!this.showStatistics) { this.showStatistics = !this.showStatistics}
 
-          this.$refs.rttChart.updateSeries([{
-                        name: 'RTT',
-                        data: this.rtt.rtt,
-          }])
-        
-          
-          setTimeout(()=>{ this.successProcess=false },4000)
         }   
       })
     },
@@ -252,9 +258,17 @@ export default {
       this.isFinishPing = !this.isFinishPing
       this.buttonFinalize = !this.buttonFinalize
     },
+    updateChartLineSeries(){
+
+      if (this.$refs.rttChart != undefined) {
+            this.$refs.rttChart.updateSeries([{
+                        name: 'RTT',
+                        data: this.rtt.rtt,
+          }])
+      }
+    },
    
   },
-
 }
 
 </script>

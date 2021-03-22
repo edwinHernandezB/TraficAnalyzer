@@ -4,23 +4,36 @@
     <v-app-bar-title>Ver Sockets activos</v-app-bar-title>
   </v-app-bar>
 
-  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
-  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
-  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
-  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
-  <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>
- 
+  <v-btn color="success" class="mt-6 ml-5 " @click="ejecutar"> Ejecutar </v-btn>
+  {{activeSockets}}
 </v-container>
 </template>
 
 <script>
-// @ is an alias to /src
+import axios from 'axios'
 
 export default {
   name: 'ActiveSockets',
   components: {
     
-  }
+  },
+  data() {
+    return {
+      activeSockets: '',
+    }
+  },
+  methods: {
+    ejecutar: function(){
+       axios
+      .get('http://localhost:4000/activeSockets')
+      .then(response =>{
+        console.log(response.data);
+        this.activeSockets = response.data.toString()
+        var res = this.activeSockets.split('\n')
+        console.log(res);
+      })
+    }
+  },
 }
 </script>
 
