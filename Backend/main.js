@@ -41,4 +41,24 @@ app.get('/activeSockets', function(req, res){
         }
     });    
 })
+
+app.get('/killProcess', function(req, res){
+    let partnerList = req.query.processPID;
+    for (let index = 0; index < partnerList.length; index++) {
+        
+        exec('kill ' + partnerList[index], (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          res.end(`Error has ocurred: ${error}`)
+          return;
+        }else{
+            res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+            res.end('Done')
+            console.log(`stdout: ${stdout}`);
+            console.error(`stderr: ${stderr}`);
+        }
+    });    
+        
+    }
+})
 app.listen(4000);
