@@ -27,7 +27,8 @@ app.get('/ping', function(req, res){
 })
 
 app.get('/activeSockets', function(req, res){
-    exec('netstat -tunlp', (error, stdout, stderr) => {
+    console.log(req.query.netstatOptions);
+    exec('netstat -' + req.query.netstatOptions, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           res.end(`Error has ocurred: ${error}`)
@@ -44,6 +45,7 @@ app.get('/activeSockets', function(req, res){
 
 app.get('/killProcess', function(req, res){
     let partnerList = req.query.processPID;
+    let isKillAll = false
     for (let index = 0; index < partnerList.length; index++) {
         
         exec('kill ' + partnerList[index], (error, stdout, stderr) => {
@@ -51,14 +53,15 @@ app.get('/killProcess', function(req, res){
           console.error(`exec error: ${error}`);
           res.end(`Error has ocurred: ${error}`)
           return;
-        }else{
-            res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-            res.end('Done')
+        }else{            
             console.log(`stdout: ${stdout}`);
             console.error(`stderr: ${stderr}`);
         }
     });    
         
     }
+    res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+    res.end('Done')
 })
 app.listen(4000);
+console.log('Servidor escuchando en puerto 4000');
