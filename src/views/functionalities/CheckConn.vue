@@ -28,13 +28,15 @@
   </v-form>
 
       <!-- Alert Info-->
-      <v-alert text color="info">
+      <v-alert text v-if="hideInfoAlert" color="info" class="mt-2  ml-3">
         <h4> Información sobre esta funcionalidad </h4>
         
         <div>
           Se utiliza la utilidad de <strong>Ping</strong> para detectar si una máquina esta disponible o no a partir de envio de paquetes ICMP.
           El número de paquetes máximo a enviar son 10.
         </div>
+        <v-btn class="mt-1" color="info"  @click="hideInfoAlert = !hideInfoAlert" outlined>Aceptar</v-btn>
+
       </v-alert>
 
       <!-- Barra de progreso de solicitud -->
@@ -139,6 +141,7 @@ export default {
       cancelSource: null,
       successProcess: false,
       showStatistics: false,
+      hideInfoAlert: true,
       alert: false,
       IP: '127.0.0.1',
       hostIP: '',
@@ -198,7 +201,7 @@ export default {
       axios
       .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage, {cancelToken: this.cancelSource.token})
       .then(response => {
-        var str = ''
+        let str = ''
         str += response.data.toString();
 
         if(str.includes('Error has ocurred'))
@@ -209,15 +212,15 @@ export default {
           setTimeout(()=>{ this.errorPing=false },15000)
 
         }else{
-          var lines = str.split("\n");
+          let lines = str.split("\n");
           this.rtt.rtt = []
           this.rtt.stats.value = []
         
-          var totalPackage = str.split('---').pop()
+          let totalPackage = str.split('---').pop()
           totalPackage = totalPackage.toString()
           totalPackage = totalPackage.match(/\d+/g).map(Number).slice(0, 2);
           
-          var rttStats = str.split('mdev = ').pop().split('/')
+          let rttStats = str.split('mdev = ').pop().split('/')
           rttStats[rttStats.length-1] = rttStats[rttStats.length-1].slice(0, -4)
           this.stats = rttStats
 

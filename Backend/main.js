@@ -38,14 +38,13 @@ app.get('/activeSockets', function(req, res){
             res.write(stdout)
             res.end()
             console.log(`stdout: ${stdout}`);
-            console.error(`stderr: ${stderr}`);
         }
     });    
 })
 
 app.get('/killProcess', function(req, res){
     let partnerList = req.query.processPID;
-    let isKillAll = false
+
     for (let index = 0; index < partnerList.length; index++) {
         
         exec('kill ' + partnerList[index], (error, stdout, stderr) => {
@@ -53,9 +52,8 @@ app.get('/killProcess', function(req, res){
           console.error(`exec error: ${error}`);
           res.end(`Error has ocurred: ${error}`)
           return;
-        }else{            
-            console.log(`stdout: ${stdout}`);
-            console.error(`stderr: ${stderr}`);
+        }else{ 
+            console.log('Process killed.');           
         }
     });    
         
