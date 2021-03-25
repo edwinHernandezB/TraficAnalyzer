@@ -135,7 +135,7 @@ export default {
             dirRemota: this.res[index][4], Estado: this.res[index][5], PID: this.res[index][6], Nombre: this.res[index][7]})
           }
         }
-
+        this.selected = []
       })
     },
     finalizarProceso: function(){
@@ -152,9 +152,6 @@ export default {
       })
       this.ejecutar()
     },
-  },
-  updated() {
-    
   },
 }
 </script>
