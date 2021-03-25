@@ -32,11 +32,27 @@
           
       <!-- Button Finalizar proceso -->
       <v-row cols="12" md="1" class=" mt-5 mb-4 mr-3" >
-      <v-spacer></v-spacer>
-      <v-btn color="error" :disabled="selected.length == 0? true:false" 
-        @click="finalizarProceso"> Finalizar proceso 
-      </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="error" :disabled="selected.length == 0? true:false" 
+          @click="finalizarProceso"> Finalizar proceso 
+        </v-btn>
       </v-row>
+
+      <!-- Estadisticas  -->
+      <v-container fluid>
+        <v-row>
+          
+          <!-- Total de conexiones  -->
+          <v-col cols="12" md="3">
+            <apexchart ref="barChart" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+           </v-col>
+
+          <!-- Total de conexiones por programa  -->
+          <v-col cols="12" md="3">
+              <apexchart ref="programStatistics" type="bar" height="350" :options="chartOptionsPerProgram" :series="seriesPerProgram"></apexchart>
+          </v-col> 
+        </v-row>
+      </v-container> 
 
       <!-- Alert information -->
       <v-row cols="12" md="1" class=" mt-5 mb-4 ml-1" >
@@ -61,20 +77,18 @@
         </v-alert>
       </v-row>  
     </v-container>
-
+{{protocolList}}
   </v-container>
 </template>
 
 <script>
 import axios from 'axios'
+import VueApexCharts from 'vue-apexcharts'
 
 export default {
   name: 'ActiveSockets',
   components: {
-    
-  },
-  mounted() {
-    console.log('hola')
+    apexcharts: VueApexCharts,
   },
   data() {
     return {
@@ -84,9 +98,71 @@ export default {
       netstatOptions: ['tupn', 'tupnl', 'tpn', 'upn'],
       activeAction: '',
       res: '',
+      protocolList: {},
+      // --------------- Estadisticas ----------------
+       series: [{
+            name: 'Número de conexiones',
+            data: []
+          }],
+
+           chartOptions: {          
+            dataLabels: {
+              enabled: true
+            },
+            grid: {
+              row: {
+                colors: ['#fff', '#f2f2f2']
+              }
+            },
+            xaxis: {
+              categories: [],
+              tickPlacement: 'on'
+            },
+            yaxis: {
+              title: {
+                text: 'Total de conexiones',
+              },
+            },
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shadeIntensity: 0.25, 
+                opacityFrom: 0.85,
+                opacityTo: 0.85,
+              },
+            }
+          },
+      // ------------- Estadisticas por programa -------------
+      seriesPerProgram: [{
+            data: []
+          }],
+          chartOptionsPerProgram: {
+            chart: {
+              type: 'bar',
+              height: 350
+            },
+            plotOptions: {
+              bar: {
+                borderRadius: 4,
+                horizontal: true,
+                distributed: true
+              }
+            },
+            dataLabels: {
+              enabled: false
+            },
+            legend: {
+              show: false
+            },
+            xaxis: {
+              categories: [],
+            }
+          },
+      statisticsPerProgram: {},
       // ------------- data table ------------------
       singleSelect: false,
       selected: [],
+      table: [],          
       headers: [
         {
           text: 'ID',
@@ -100,10 +176,9 @@ export default {
          { text: 'IP local : Puerto', value: 'dirLocal' },
          { text: 'IP remota : Puerto', value: 'dirRemota' },
          { text: 'Estado', value: 'Estado' },
-          { text: 'PID', value: 'PID' },
+         { text: 'PID', value: 'PID' },
          { text: 'Nombre del programa', value: 'Nombre' },
       ],
-      table: [],          
     }
   },
   methods: {
@@ -111,7 +186,8 @@ export default {
       this.table = []
       let indexAccion = this.accions.indexOf(this.activeAction)
       let params = { netstatOptions: this.netstatOptions[indexAccion]}
-      
+      this.protocolList = {}
+      this.statisticsPerProgram = {}
       axios
       .get('http://localhost:4000/activeSockets', { params })
       .then(response =>{
@@ -123,18 +199,38 @@ export default {
         
         for (let index = 0; index < this.res.length-1; index++) {
 
-          if(this.res[index][0].match('udp') && indexAccion != 3) { 
+          if(this.res[index][0].match('udp') && indexAccion != 3 && indexAccion != 0) { 
           
             this.table.push({
             id: index, Protocolo: this.res[index][0], Recibidos: this.res[index][1], Enviados: this.res[index][2], dirLocal: this.res[index][3],
             dirRemota: this.res[index][4], Estado: '-', PID: this.res[index][5], Nombre: this.res[index][6]})
-                 
+            if(this.statisticsPerProgram[this.res[index][6]] == null) { this.statisticsPerProgram[this.res[index][6]] = 1} else { this.statisticsPerProgram[this.res[index][6]] = this.statisticsPerProgram[this.res[index][6]]+1}
+   
           }else{
             this.table.push({
             id: index, Protocolo: this.res[index][0], Recibidos: this.res[index][1], Enviados: this.res[index][2], dirLocal: this.res[index][3],
             dirRemota: this.res[index][4], Estado: this.res[index][5], PID: this.res[index][6], Nombre: this.res[index][7]})
+            if(this.statisticsPerProgram[this.res[index][7]] == null) { this.statisticsPerProgram[this.res[index][7]] = 1} else { this.statisticsPerProgram[this.res[index][7]] = this.statisticsPerProgram[this.res[index][7]]+1}
+
           }
+          if(this.protocolList[this.res[index][0]] == null) { this.protocolList[this.res[index][0]] = 1} else { this.protocolList[this.res[index][0]] = this.protocolList[this.res[index][0]]+1}
+          
         }
+        console.log(this.statisticsPerProgram);
+        this.series = [{
+                      name: 'Número de conexiones',
+
+          data: Object.values(this.protocolList)
+        }]
+         this.$refs.barChart.updateOptions({ labels: Object.keys(this.protocolList), });
+        
+        this.seriesPerProgram = [{
+
+          data: Object.values(this.statisticsPerProgram)
+        }]
+        this.$refs.programStatistics.updateOptions({ labels: Object.keys(this.statisticsPerProgram), });
+
+
         this.selected = []
       })
     },
