@@ -29,7 +29,7 @@
         item-key="id" show-select class="elevation-1">    
       </v-data-table>
 
-          
+       
       <!-- Button Finalizar proceso -->
       <v-row cols="12" md="1" class=" mt-5 mb-4 mr-3" >
         <v-spacer></v-spacer>
@@ -39,19 +39,79 @@
       </v-row>
 
       <!-- Estadisticas  -->
-      <v-container fluid>
+      <v-container fluid v-if="showStatistics">
         <v-row>
           
           <!-- Total de conexiones  -->
-          <v-col cols="12" md="3">
-            <apexchart ref="barChart" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+          <v-col cols="12" md="6">
+            <apexchart ref="barChart" type="bar" height="300" :options="chartOptions" :series="series"></apexchart>
            </v-col>
 
           <!-- Total de conexiones por programa  -->
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="5">
               <apexchart ref="programStatistics" type="bar" height="350" :options="chartOptionsPerProgram" :series="seriesPerProgram"></apexchart>
           </v-col> 
+
+          <!-- Estados de conexiones -->
+          <v-col cols="12" md="3">
+          </v-col> 
         </v-row>
+        </v-container> 
+    
+
+       <!-- Table inforrmation -->
+             <v-container fluid v-if="showStatistics"> 
+      <v-col cols="12" >
+        <v-alert color="teal lighten-1" dark dense icon="mdi-school" prominent>
+          A diferencia de las conexiones <strong>TCP</strong>, <strong>UDP</strong> no establece una conexión previa, es por este
+          motivo que en la tabla de conexiones anterior no se muestra de manera estricta nada en la columna de <strong>Estado </strong>
+          para las conexiones UDP, pero puede tener dos estados cuando la conexión está activa: <br>
+          <ul>
+            <li><strong>Establecido:</strong> El dispositivo sigue enviando datagramas al mismo destino a través del mismo puerto UDP.</li>
+            <li><strong>Cerrado:</strong> La conexión UDP se cierra cuando no hay eventos nuevos a realizar. </li>
+          </ul>
+
+          <table >
+            <tr>
+              <th colspan="2">Diferencias entre TCP y UDP</th>
+            </tr>
+            <tr>
+              <th>TCP</th>
+              <th>UDP</th>
+            </tr>
+            <tr>
+            <tr>
+              <td> <strong> 20 Bytes</strong> de cabecera</td>
+              <td><strong> 8 Bytes</strong> de cabecera</td>
+            </tr>
+            <tr>
+              <td><strong>Establece una conexión previa</strong> entre los dos ordenadores</td>
+              <td>Envia datos <strong>sin establecer conexión previa</strong></td>
+            </tr>
+            <tr>
+              <td>Puede <strong>retransmitir</strong> los <strong>paquetes perdidos</strong></td>
+              <td><strong>No retransmite</strong> paquetes perdidos</td>
+            </tr>
+            <tr>
+              <td>Orientado a <strong>conexión</strong></td>
+              <td>Orientado a la <strong>no conexión</strong></td>
+            </tr>
+            <tr>
+              <td>Lento</td>
+              <td>Rápido</td>
+            </tr>
+            <tr>
+              <td>Fiable</td>
+              <td>No fiable</td>
+            </tr>
+            
+            </table>
+           
+           
+        </v-alert>
+      </v-col>   
+      </v-container> 
+
       </v-container> 
 
       <!-- Alert information -->
@@ -77,8 +137,6 @@
         </v-alert>
       </v-row>  
     </v-container>
-{{protocolList}}
-  </v-container>
 </template>
 
 <script>
@@ -92,6 +150,7 @@ export default {
   },
   data() {
     return {
+      showStatistics: false,
       hideInfoAlert: true,
       accions: ['Mostrar todas las conexiones activas', 'Mostrar conexiones en estado "listening"', 
       'Mostrar solo conexiones TCP activas', 'Mostrar solo conexiones UDP activas'],
@@ -99,7 +158,7 @@ export default {
       activeAction: '',
       res: '',
       protocolList: {},
-      // --------------- Estadisticas ----------------
+      // --------------- Total de conexiones ----------------
        series: [{
             name: 'Número de conexiones',
             data: []
@@ -113,6 +172,10 @@ export default {
               row: {
                 colors: ['#fff', '#f2f2f2']
               }
+            },
+            title:{
+              text: 'Total de conexiones',
+              align: 'center'
             },
             xaxis: {
               categories: [],
@@ -141,6 +204,10 @@ export default {
               type: 'bar',
               height: 350
             },
+            title:{
+              text: 'Total de conexiones por programa',
+              align: 'center'
+            },
             plotOptions: {
               bar: {
                 borderRadius: 4,
@@ -159,6 +226,7 @@ export default {
             }
           },
       statisticsPerProgram: {},
+     
       // ------------- data table ------------------
       singleSelect: false,
       selected: [],
@@ -184,6 +252,7 @@ export default {
   methods: {
     ejecutar: function(){
       this.table = []
+      this.showStatistics = true
       let indexAccion = this.accions.indexOf(this.activeAction)
       let params = { netstatOptions: this.netstatOptions[indexAccion]}
       this.protocolList = {}
@@ -214,9 +283,10 @@ export default {
 
           }
           if(this.protocolList[this.res[index][0]] == null) { this.protocolList[this.res[index][0]] = 1} else { this.protocolList[this.res[index][0]] = this.protocolList[this.res[index][0]]+1}
-          
+
         }
-        console.log(this.statisticsPerProgram);
+        
+
         this.series = [{
                       name: 'Número de conexiones',
 
@@ -238,15 +308,16 @@ export default {
       let process = []
       for (let index = 0; index < this.selected.length; index++) {
         process.push(this.selected[index].PID);
+     
       }
       
       axios
       .get('http://localhost:4000/killProcess', { params: { processPID: process } })
       .then(response =>{
           console.log('Kill process done!');
-          
+          this.table = []
+          this.ejecutar()
       })
-      this.ejecutar()
     },
   },
 }
@@ -257,4 +328,16 @@ export default {
   position:fixed; 
   top:40px;
 }
+th{
+  text-align: center;
+}
+td{
+  text-align: left;
+}
+td, th {
+  padding: 5px;
+  border: 1px solid #dddddd;
+
+}
+
 </style>
