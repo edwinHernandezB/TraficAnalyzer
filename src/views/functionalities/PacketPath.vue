@@ -29,6 +29,18 @@
         
        
       </v-row>
+      <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 2" class="mt-1"
+      border="left"
+      color="light-blue lighten-2"
+      dark
+    >
+    <v-row class="ml-1">
+      <h4>IP: {{IP}}</h4>
+    </v-row>
+     <v-row class="ml-1">
+      <h4>Dominio: {{result}}</h4>
+    </v-row>
+    </v-alert>
        <v-row v-if="activeAction == accions[3]" >
         <v-col cols="12" md="2">
           <v-text-field v-model="domain" :rules="rulesDomain" label="Nombre de dominio" required></v-text-field>
@@ -71,7 +83,7 @@ export default {
       'Resolver nombre de dominio de una IP', 'Encontrar IP de un nombre de dominio'],
       activeAction: '',
       auxAction: '',
-      IP: '',
+      IP: ' ',
       domain: ' ',
       result: '',
       showResult: false,
@@ -96,6 +108,10 @@ export default {
       .get('http://localhost:4000/packetPath', { params })
       .then(response =>{
         switch (selectedOption) {
+          case 2:
+            this.result = response.data
+            this.auxAction = this.IP
+            break;
           case 3:
             this.auxAction = this.domain
             this.result = response.data
