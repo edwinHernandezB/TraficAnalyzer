@@ -17,6 +17,7 @@
     "child-process-promise": "^2.2.1",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
+    "dns": "^0.1.2",
     "roboto-fontface": "*",
     "vue": "^2.6.12",
     "vue-apexcharts": "^1.6.0",

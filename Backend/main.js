@@ -1,5 +1,6 @@
 const {spawn} = require('child_process');
 const cors = require('cors');
+const dns = require('dns');
 
 
 var exec = require('child_process').exec;
@@ -61,5 +62,35 @@ app.get('/killProcess', function(req, res){
     res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
     res.end('Done')
 })
+
+app.get('/packetPath', function(req, res){
+    
+    if (req.query.option == 3) {
+        dns.lookup(req.query.value, (err, address, family) => {
+            res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+            res.end(address)
+          });
+    }else{
+        
+        exec('nslookup ' + req.query.value, (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`);
+              res.end(`Error has ocurred: ${error}`)
+              return;
+            }else{ 
+                let domain = stdout.split('name = ').pop().split('\n').splice(0,1).toString()
+                domain = domain.substring(0,domain.length-1)
+                console.log(domain);
+                res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+                res.end(domain)
+            }
+        })
+    }
+   
+
+    });    
+        
+   
+
 app.listen(4000);
 console.log('Servidor escuchando en puerto 4000');
