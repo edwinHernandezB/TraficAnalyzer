@@ -36,7 +36,7 @@
         <!--Button Ejecutar y Finalizar-->
         <v-btn color="success"  class="mt-6 ml-5 " :disabled="domain.length < 1" @click="ejecutar"> Ejecutar </v-btn>
       </v-row>
-    <v-alert v-if="auxAction == domain" class="mt-1"
+    <v-alert v-if="auxAction == domain  && accions.indexOf(activeAction) == 3" class="mt-1"
       border="left"
       color="light-blue lighten-2"
       dark
