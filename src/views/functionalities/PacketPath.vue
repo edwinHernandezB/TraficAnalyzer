@@ -60,51 +60,19 @@
       <h4>IP: {{result}}</h4>
     </v-row>
     </v-alert>
-    {{ipInformation}}
-    {{auxAction}}
-    <!-- opcion 2-->
  
     </v-container>
   </v-form>
 
+  <!-- opcion IP Geolocation--> 
   <!-- map -->
-   <div v-if="auxAction == IP  && accions.indexOf(activeAction) == 1 && isCorrectIP" class="mt-1" style="height: 600px; width: 100%" >
-    <div style="height: 200px overflow: auto;">
-      <p>First marker is placed at {{ withPopup.lat }}, {{ withPopup.lng }}</p>
-      <p>Center is at {{ currentCenter }} and the zoom is: {{ currentZoom }}</p>
-      <button @click="showLongText">
-        Toggle long popup
-      </button>
-      <button @click="showMap = !showMap">
-        Toggle map
-      </button>
-    </div>
+   <v-container  fluid v-if="auxAction == IP  && accions.indexOf(activeAction) == 1 && isCorrectIP" class="mt-1" style="height: 600px; width: 100%" >
     <l-map
-      v-if="showMap"
-      :zoom="zoom"
-      :center="[ipInformation.Latitud, ipInformation.Longitud]"
-      :options="mapOptions"
-      style="height: 80%"
-      @update:center="centerUpdate"
-      @update:zoom="zoomUpdate"
+      v-if="showMap" :zoom="zoom" :center="[ipInformation.Latitud, ipInformation.Longitud]" :options="mapOptions"
+      style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
     >
-      <l-tile-layer
-        :url="url"
-        :attribution="attribution"
-      />
-            <l-marker :lat-lng="[47.414407, -1.247013]" > </l-marker>
-      <l-marker :lat-lng="[47.413037, -1.248199]" >
-        <l-popup>
-          <div @click="innerClick">
-            I am a popup
-            <p v-show="showParagraph">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-              sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-              Donec finibus semper metus id malesuada.
-            </p>
-          </div>
-        </l-popup>
-      </l-marker>
+      <l-tile-layer :url="url" :attribution="attribution"/>
+
       <l-marker :lat-lng="[ipInformation.Latitud, ipInformation.Longitud]">
         <l-tooltip :options="{ permanent: true, interactive: true }">
           <div @click="innerClick">
@@ -118,7 +86,16 @@
         </l-tooltip>
       </l-marker>
     </l-map>
-  </div>
+   </v-container>
+
+   <!-- Alerta de error de geo localización -->
+      <v-alert :value="errorLocation" type="error"> 
+        Error al realizar la petición, comprueba lo siguiente:
+        <ul>
+          <li>La IP introducida sea correcta</li>
+          <li>No se trata de una IP privada</li>
+        </ul>
+      </v-alert>
   <!-- map -->
 
 </v-container>
@@ -144,20 +121,18 @@ export default {
   data() {
     return {
       //--------------map-----------------------------
-      zoom: 13,
+      zoom: 15,
       center: latLng(47.41322, -1.219482),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      withPopup: latLng(47.41322, -1.219482),
-      withTooltip: latLng(47.41422, -1.250482),
       currentZoom: 11.5,
       currentCenter: latLng(47.41322, -1.219482),
-      showParagraph: false,
       mapOptions: {
         zoomSnap: 0.5
       },
       showMap: true,
+      errorLocation: false,
       //--------------------------------------------
       accions: ['Trazar ruta de un paquete', 'Mostrar geolocalización de una IP', 
       'Resolver nombre de dominio de una IP', 'Encontrar IP de un nombre de dominio'],
@@ -178,6 +153,7 @@ export default {
         Organizacion: '',
       },
       locationDetail: {},
+      traceRoute: [],
       //----------- Rules form --------------
       isCorrectIP: false,
       isDomainNull: false,
@@ -201,25 +177,54 @@ export default {
                      option: selectedOption}
 
       if (selectedOption == 0) {
-        
+        let result =[]
+        let values = []
+        axios
+        .get('http://localhost:4000/packetPath', { params })
+        .then(response =>{
+          
+          let res = response.data.split('\n').map(value => value.match(/[^ |ms]+/g)).splice(1, response.data.length -1)
+          for (let index = 0; index < res.length-1; index++) {
+            result.push({
+              id: res[index][0], 
+              ip: res[index][1],
+              rtt: res[index].splice(2,4)
+            })
+            
+            if (res[index][1].match(/\b(?!(10)|192\.168|172\.(2[0-9]|1[6-9]|3[0-2]))[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)) {
+            axios
+            .get('https://ipapi.co/' + res[index][1]  +'/json/')
+            .then(response =>{
+              values.push(response.data)
+              this.traceRoute.push(response.data)
+            })
+            }
+          }
+        })
+                
       } else if (selectedOption == 1) {
         axios
         .get('https://ipapi.co/'+ this.IP + '/json/')
         .then(response =>{
-           this.auxAction = this.IP
-           this.locationDetail = response.data
-           this.ipInformation = {
-             IP: response.data.ip,
-             Pais: response.data.country_name,
-             Ciudad: response.data.city,
-             Region: response.data.region,
-             Codigo: response.data.country_code_iso3,
-             Ciudad: response.data.city,
-             Latitud: response.data.latitude,
-             Longitud: response.data.longitude,
-             Organizacion: response.data.org,
-            }
-            console.log(this.ipInformation);
+          if (response.data.longitude != undefined && response.data.latitude != undefined) {
+             this.auxAction = this.IP
+            this.locationDetail = response.data
+            this.ipInformation = {
+              IP: response.data.ip,
+              Pais: response.data.country_name,
+              Ciudad: response.data.city,
+              Region: response.data.region,
+              Codigo: response.data.country_code_iso3,
+              Ciudad: response.data.city,
+              Latitud: response.data.latitude,
+              Longitud: response.data.longitude,
+              Organizacion: response.data.org,
+             }
+          } else {
+           console.log('error');
+           this.errorLocation = !this.errorLocation
+           setTimeout(()=>{ this.errorLocation=false },5000)
+          }
         })
       } else {
 
@@ -239,8 +244,9 @@ export default {
             default:
               break;
           }
-          console.log(response.data);
         })
+      
+       
       }
      
 
@@ -251,9 +257,6 @@ export default {
     },
     centerUpdate(center) {
       this.currentCenter = center;
-    },
-    showLongText() {
-      this.showParagraph = !this.showParagraph;
     },
     innerClick() {
       alert(JSON.stringify(this.locationDetail, null, 4));

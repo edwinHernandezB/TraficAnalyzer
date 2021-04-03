@@ -1,7 +1,7 @@
 const {spawn} = require('child_process');
+const execsync = require('child_process').execSync
 const cors = require('cors');
 const dns = require('dns');
-
 
 var exec = require('child_process').exec;
 express = require("express"),
@@ -63,17 +63,46 @@ app.get('/killProcess', function(req, res){
     res.end('Done')
 })
 
+
 app.get('/packetPath', function(req, res){
     
-    if (req.query.option == 3) {
+    if (req.query.option == 0) {
+        console.log('dentro 0');
+        let result = execsync('traceroute ' + req.query.value)
+        console.log(result + ' ');
+        res.send(result)
+        res.end()
+        /*exec('traceroute ' + req.query.value, (error, stdout, stderr) => {
+          if (error) {
+              res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+              console.error(`exec error: ${error}`);
+              res.end(`Error has ocurred: ${error}`)
+              return;
+            }else{
+                let _result = []
+                let _http = []
+                let auxString = stdout.split('\n').map(value => value.match(/[^ |ms]+/g)).splice(1, stdout.length -1)
+                res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+                res.send('hola')
+                res.end()
+                
+            }
+        })*/
+        
+
+
+    }
+    else if (req.query.option == 3) {
+        console.log('dentro 3');
         dns.lookup(req.query.value, (err, address, family) => {
             res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
             res.end(address)
           });
     }else{
-        
+        console.log('dentro else');
         exec('nslookup ' + req.query.value, (error, stdout, stderr) => {
             if (error) {
+              res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
               console.error(`exec error: ${error}`);
               res.end(`Error has ocurred: ${error}`)
               return;
