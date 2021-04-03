@@ -63,25 +63,12 @@
     {{ipInformation}}
     {{auxAction}}
     <!-- opcion 2-->
-  <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 1 && isCorrectIP" class="mt-1"
-      border="left"
-      color="light-blue lighten-2"
-      dark
-    >
-    <v-row class="ml-1"> <h4>IP: {{ipInformation.IP}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>País: {{ipInformation.Pais}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>Código: {{ipInformation.Codigo}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>Ciudad: {{ipInformation.Ciudad}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>Latitud: {{ipInformation.Latitud}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>Longitud: {{ipInformation.Longitud}}</h4> </v-row>
-    <v-row class="ml-1"> <h4>Organizacion: {{ipInformation.Organizacion}}</h4> </v-row>
-   
-    </v-alert>
+ 
     </v-container>
   </v-form>
 
   <!-- map -->
-   <div style="height: 500px; width: 100%" >
+   <div v-if="auxAction == IP  && accions.indexOf(activeAction) == 1 && isCorrectIP" class="mt-1" style="height: 600px; width: 100%" >
     <div style="height: 200px overflow: auto;">
       <p>First marker is placed at {{ withPopup.lat }}, {{ withPopup.lng }}</p>
       <p>Center is at {{ currentCenter }} and the zoom is: {{ currentZoom }}</p>
@@ -95,7 +82,7 @@
     <l-map
       v-if="showMap"
       :zoom="zoom"
-      :center="center"
+      :center="[ipInformation.Latitud, ipInformation.Longitud]"
       :options="mapOptions"
       style="height: 80%"
       @update:center="centerUpdate"
@@ -118,15 +105,15 @@
           </div>
         </l-popup>
       </l-marker>
-      <l-marker :lat-lng="withTooltip">
+      <l-marker :lat-lng="[ipInformation.Latitud, ipInformation.Longitud]">
         <l-tooltip :options="{ permanent: true, interactive: true }">
           <div @click="innerClick">
-            I am a tooltip
-            <p v-show="showParagraph">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-              sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-              Donec finibus semper metus id malesuada.
-            </p>
+            IP: {{ipInformation.IP}} <br>
+            Ciudad: {{ipInformation.Ciudad}} <br>
+            Region: {{ipInformation.Region}} <br>
+            País: {{ipInformation.Pais}} <br>
+            Organizacion: {{ipInformation.Organizacion}} <br>
+            <u> Click para más detalles</u>
           </div>
         </l-tooltip>
       </l-marker>
@@ -179,7 +166,18 @@ export default {
       IP: '',
       domain: '',
       result: '',
-      ipInformation: {},
+      ipInformation: {
+        IP: '',
+        Pais: '',
+        Ciudad: '',
+        Region: '',
+        Codigo: '',
+        Ciudad: '',
+        Latitud: 0,
+        Longitud: -1,
+        Organizacion: '',
+      },
+      locationDetail: {},
       //----------- Rules form --------------
       isCorrectIP: false,
       isDomainNull: false,
@@ -209,10 +207,12 @@ export default {
         .get('https://ipapi.co/'+ this.IP + '/json/')
         .then(response =>{
            this.auxAction = this.IP
-           console.log(response.data);
+           this.locationDetail = response.data
            this.ipInformation = {
              IP: response.data.ip,
              Pais: response.data.country_name,
+             Ciudad: response.data.city,
+             Region: response.data.region,
              Codigo: response.data.country_code_iso3,
              Ciudad: response.data.city,
              Latitud: response.data.latitude,
@@ -256,7 +256,7 @@ export default {
       this.showParagraph = !this.showParagraph;
     },
     innerClick() {
-      alert("Click!");
+      alert(JSON.stringify(this.locationDetail, null, 4));
     }
   },
  
