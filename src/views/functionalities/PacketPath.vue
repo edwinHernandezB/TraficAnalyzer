@@ -97,7 +97,19 @@
         </ul>
       </v-alert>
   <!-- map -->
-
+ <!-- opcion traceroute--> 
+  <!-- map -->
+   <v-container  fluid v-if="accions.indexOf(activeAction) == 0 && isTraceRoute" class="mt-1" style="height: 600px; width: 100%" >
+    <l-map
+      v-if="showMap" :zoom="zoom" :center="[ipInformation.Latitud, ipInformation.Longitud]" :options="mapOptions"
+      style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
+    >
+      <l-tile-layer :url="url" :attribution="attribution"/>
+      <!--<l-marker :lat-lng="[traceRoute[0].Latitud, traceRoute[0].Longitud]"></l-marker>-->
+      <l-marker v-for="(location, index) in traceRoute" :key="location.IP"  :lat-lng="[location.Latitud, location.Longitud]"></l-marker>-
+    </l-map>
+   </v-container>
+   {{traceRoute[0]}}
 </v-container>
 </template>
 
@@ -154,6 +166,7 @@ export default {
       },
       locationDetail: {},
       traceRoute: [],
+      isTraceRoute: false,
       //----------- Rules form --------------
       isCorrectIP: false,
       isDomainNull: false,
@@ -196,12 +209,26 @@ export default {
             .get('https://ipapi.co/' + res[index][1]  +'/json/')
             .then(response =>{
               values.push(response.data)
-              this.traceRoute.push(response.data)
+              this.traceRoute.push({
+              IP: response.data.ip,
+              Pais: response.data.country_name,
+              Ciudad: response.data.city,
+              Region: response.data.region,
+              Codigo: response.data.country_code_iso3,
+              Ciudad: response.data.city,
+              Latitud: response.data.latitude,
+              Longitud: response.data.longitude,
+              Organizacion: response.data.org,
+             })
             })
             }
           }
+          this.isTraceRoute = !this.isTraceRoute
         })
-                
+  
+
+        
+        
       } else if (selectedOption == 1) {
         axios
         .get('https://ipapi.co/'+ this.IP + '/json/')
