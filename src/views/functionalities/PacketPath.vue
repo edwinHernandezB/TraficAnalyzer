@@ -118,11 +118,25 @@
       </l-marker>-
     </l-map>
       <!-- Table -->
-      <v-data-table
-        v-model="selected" :headers="headers" :items="table" :single-select="singleSelect"
-        item-key="id" show-select class="elevation-1">    
-      </v-data-table>
-
+    
+      <v-card>
+    <v-card-title>
+      Paquetes 
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="search"
+        append-icon="mdi-magnify"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
+    <v-data-table
+      :headers="headers"
+      :items="desserts"
+      :search="search"
+    ></v-data-table>
+  </v-card>
    </v-container>
 </v-container>
 </template>
@@ -196,25 +210,22 @@ export default {
         
       ],
       //------------- RTT table ------------------
-       singleSelect: false,
-      selected: [],
-      table: [],          
+      search: '',
       headers: [
-        {
-          text: 'ID',
-          align: 'start',
-          sortable: false,
-          value: 'id',
-        },
-         { text: 'Protocolo', value: 'Protocolo' },
-         { text: 'Recibidos', value: 'Recibidos' },
-         { text: 'Enviados', value: 'Enviados' },
-         { text: 'IP local : Puerto', value: 'dirLocal' },
-         { text: 'IP remota : Puerto', value: 'dirRemota' },
-         { text: 'Estado', value: 'Estado' },
-         { text: 'PID', value: 'PID' },
-         { text: 'Nombre del programa', value: 'Nombre' },
+      {
+        text: 'HOP',
+        align: 'start',
+        sortable: false,
+        value: 'HOP',
+       },
+       { text: 'IP', value: 'IP' },
+       { text: 'RTT1 (ms)', value: 'RTT1' },
+       { text: 'RTT2 (ms)' , value: 'RTT2' },
+       { text: 'RTT3 (ms)', value: 'RTT3' },
       ],
+      desserts: [],
+     
+      
     }
   },
   methods: {
@@ -232,10 +243,13 @@ export default {
           this.auxAction = this.IP
           let res = response.data.split('\n').map(value => value.match(/[^ |ms]+/g)).splice(1, response.data.length -1)
           for (let index = 0; index < res.length-1; index++) {
-            result.push({
-              id: res[index][0], 
-              ip: res[index][1],
-              rtt: res[index].splice(2,4)
+            this.desserts.push({
+              HOP: res[index][0], 
+              IP: res[index][1],
+              RTT1: res[index].splice(2,1),
+              RTT2: res[index].splice(2,1),
+              RTT3: res[index].splice(2,1),
+
             })
             
             if (res[index][1].match(/\b(?!(10)|192\.168|172\.(2[0-9]|1[6-9]|3[0-2]))[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)) {
