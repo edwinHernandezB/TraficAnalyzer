@@ -63,10 +63,10 @@
  
     </v-container>
   </v-form>
-
+ 
   <!-- opcion IP Geolocation--> 
   <!-- map -->
-   <v-container  fluid v-if="accions.indexOf(activeAction) == 1" class="mt-1" style="height: 800px; width: 100%" >
+   <v-container  fluid v-if="accions.indexOf(activeAction) == 1" class="mt-1" style="height: 600px; width: 100%" >
     <l-map
       v-if="showMap" :zoom="zoom" :center="[ipInformation.Latitud, ipInformation.Longitud]" :options="mapOptions"
       style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
@@ -96,16 +96,18 @@
           <li>No se trata de una IP privada</li>
         </ul>
       </v-alert>
+
+      
   <!-- map -->
  <!-- opcion traceroute--> 
   <!-- map -->
-   <v-container  fluid v-if="accions.indexOf(activeAction) == 0" class="mt-1" style="height: 800px; width: 100%" >
+   <v-container  fluid v-if="accions.indexOf(activeAction) == 0" class="mt-1" style="height: 600px; width: 100%" >
     <l-map
-      v-if="showMap" :zoom="zoom" :center="[0, -1]" :options="mapOptions"
+      v-if="showMap" :zoom="zoom" :center="[this.traceRoute[0].Latitud, this.traceRoute[0].Longitud]" :options="mapOptions"
       style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
     >
       <l-tile-layer :url="url" :attribution="attribution"/>
-      <l-marker v-for="location in traceRoute" :key="location.IP"  :lat-lng="[location.Latitud, location.Longitud]">
+      <l-marker  v-for="location in traceRoute" :key="location.IP"  :lat-lng="[location.Latitud, location.Longitud]">
       <l-tooltip :options="{ permanent: true, interactive: true }">
           <div @click="innerClick">
             Hop: {{location.ID}} <br>
@@ -115,6 +117,12 @@
         </l-tooltip>  
       </l-marker>-
     </l-map>
+      <!-- Table -->
+      <v-data-table
+        v-model="selected" :headers="headers" :items="table" :single-select="singleSelect"
+        item-key="id" show-select class="elevation-1">    
+      </v-data-table>
+
    </v-container>
 </v-container>
 </template>
@@ -166,14 +174,12 @@ export default {
         Region: '',
         Codigo: '',
         Ciudad: '',
-        Latitud: 0,
-        Longitud: -1,
+        Latitud: 40,
+        Longitud: -10,
         Organizacion: '',
       },
       locationDetail: {},
-      traceRoute: [{Latitud: 0, Longitud: -1}],
-      isTraceRoute: false,
-      isGeoLocation: false,
+      traceRoute: [{Latitud: 40, Longitud: -10}],
       isIPToDomain: false,
       //----------- Rules form --------------
       isCorrectIP: false,
@@ -188,6 +194,26 @@ export default {
         v => { if(/[^ ]+/g.test(v)){ this.isDomainNull = true}else { this.isDomainNull = false} return true }
 
         
+      ],
+      //------------- RTT table ------------------
+       singleSelect: false,
+      selected: [],
+      table: [],          
+      headers: [
+        {
+          text: 'ID',
+          align: 'start',
+          sortable: false,
+          value: 'id',
+        },
+         { text: 'Protocolo', value: 'Protocolo' },
+         { text: 'Recibidos', value: 'Recibidos' },
+         { text: 'Enviados', value: 'Enviados' },
+         { text: 'IP local : Puerto', value: 'dirLocal' },
+         { text: 'IP remota : Puerto', value: 'dirRemota' },
+         { text: 'Estado', value: 'Estado' },
+         { text: 'PID', value: 'PID' },
+         { text: 'Nombre del programa', value: 'Nombre' },
       ],
     }
   },
@@ -231,12 +257,9 @@ export default {
             })
             }
           }
+          latLng = [this.traceRoute[0].Latitud, this.traceRoute[0].Longitud]
           this.traceRoute = this.traceRoute.splice(1, this.traceRoute.length)
-        })
-  
-
-        
-        
+        })  
       } else if (selectedOption == 1) {
         axios
         .get('https://ipapi.co/'+ this.IP + '/json/')
@@ -282,17 +305,14 @@ export default {
           }
         })
       
-       
       }
-     
-
     },
     //--------------- map -----------------------
     zoomUpdate(zoom) {
       this.currentZoom = zoom;
     },
     centerUpdate(center) {
-      this.currentCenter = center;
+      this.currentCenter = [];
     },
     innerClick() {
       alert(JSON.stringify(this.locationDetail, null, 4));
