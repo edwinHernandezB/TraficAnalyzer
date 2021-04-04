@@ -29,7 +29,7 @@
         
        
       </v-row>
-      <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 2 && isCorrectIP" class="mt-1"
+      <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 2 && isIPToDomain" class="mt-1"
       border="left"
       color="light-blue lighten-2"
       dark
@@ -66,7 +66,7 @@
 
   <!-- opcion IP Geolocation--> 
   <!-- map -->
-   <v-container  fluid v-if="auxAction == IP  && accions.indexOf(activeAction) == 1 && isCorrectIP" class="mt-1" style="height: 600px; width: 100%" >
+   <v-container  fluid v-if="accions.indexOf(activeAction) == 1" class="mt-1" style="height: 800px; width: 100%" >
     <l-map
       v-if="showMap" :zoom="zoom" :center="[ipInformation.Latitud, ipInformation.Longitud]" :options="mapOptions"
       style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
@@ -99,17 +99,23 @@
   <!-- map -->
  <!-- opcion traceroute--> 
   <!-- map -->
-   <v-container  fluid v-if="accions.indexOf(activeAction) == 0 && isTraceRoute" class="mt-1" style="height: 600px; width: 100%" >
+   <v-container  fluid v-if="accions.indexOf(activeAction) == 0" class="mt-1" style="height: 800px; width: 100%" >
     <l-map
-      v-if="showMap" :zoom="zoom" :center="[ipInformation.Latitud, ipInformation.Longitud]" :options="mapOptions"
+      v-if="showMap" :zoom="zoom" :center="[0, -1]" :options="mapOptions"
       style="height: 80%; position: relative; z-index: 2; " @update:center="centerUpdate" @update:zoom="zoomUpdate"
     >
       <l-tile-layer :url="url" :attribution="attribution"/>
-      <!--<l-marker :lat-lng="[traceRoute[0].Latitud, traceRoute[0].Longitud]"></l-marker>-->
-      <l-marker v-for="(location, index) in traceRoute" :key="location.IP"  :lat-lng="[location.Latitud, location.Longitud]"></l-marker>-
+      <l-marker v-for="location in traceRoute" :key="location.IP"  :lat-lng="[location.Latitud, location.Longitud]">
+      <l-tooltip :options="{ permanent: true, interactive: true }">
+          <div @click="innerClick">
+            Hop: {{location.ID}} <br>
+            IP: {{location.IP}} <br>
+            
+          </div>
+        </l-tooltip>  
+      </l-marker>-
     </l-map>
    </v-container>
-   {{traceRoute[0]}}
 </v-container>
 </template>
 
@@ -133,7 +139,7 @@ export default {
   data() {
     return {
       //--------------map-----------------------------
-      zoom: 15,
+      zoom: 3,
       center: latLng(47.41322, -1.219482),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
@@ -165,8 +171,10 @@ export default {
         Organizacion: '',
       },
       locationDetail: {},
-      traceRoute: [],
+      traceRoute: [{Latitud: 0, Longitud: -1}],
       isTraceRoute: false,
+      isGeoLocation: false,
+      isIPToDomain: false,
       //----------- Rules form --------------
       isCorrectIP: false,
       isDomainNull: false,
@@ -191,11 +199,11 @@ export default {
 
       if (selectedOption == 0) {
         let result =[]
-        let values = []
+        this.traceRoute = []
         axios
         .get('http://localhost:4000/packetPath', { params })
         .then(response =>{
-          
+          this.auxAction = this.IP
           let res = response.data.split('\n').map(value => value.match(/[^ |ms]+/g)).splice(1, response.data.length -1)
           for (let index = 0; index < res.length-1; index++) {
             result.push({
@@ -208,8 +216,8 @@ export default {
             axios
             .get('https://ipapi.co/' + res[index][1]  +'/json/')
             .then(response =>{
-              values.push(response.data)
               this.traceRoute.push({
+              ID: res[index][0],
               IP: response.data.ip,
               Pais: response.data.country_name,
               Ciudad: response.data.city,
@@ -223,7 +231,7 @@ export default {
             })
             }
           }
-          this.isTraceRoute = !this.isTraceRoute
+          this.traceRoute = this.traceRoute.splice(1, this.traceRoute.length)
         })
   
 
@@ -262,6 +270,7 @@ export default {
             case 2:
               this.result = response.data
               this.auxAction = this.IP
+              this.isIPToDomain = !this.isIPToDomain
               break;
             case 3:
               this.auxAction = this.domain
