@@ -33,7 +33,8 @@
         
         <div>
           Se utiliza la utilidad de <strong>Ping</strong> para detectar si una máquina esta disponible o no a partir de envio de paquetes ICMP.
-          El número de paquetes máximo a enviar son 10.
+          El número de paquetes máximo a enviar son 10. <br>
+          El resultado <strong>puede tardar unos segundos</strong>  en función del número de paquetes enviados, aproximadamente un segundo por paquete.
         </div>
         <v-btn class="mt-1" color="info"  @click="hideInfoAlert = !hideInfoAlert" outlined>Aceptar</v-btn>
 

@@ -68,29 +68,54 @@ app.get('/packetPath', function(req, res){
     
     if (req.query.option == 0) {
         console.log('dentro 0');
-        let result = execsync('traceroute ' + req.query.value)
-        console.log(result + ' ');
-        res.send(result)
-        res.end()
-        /*exec('traceroute ' + req.query.value, (error, stdout, stderr) => {
-          if (error) {
+       /* try {
+            let result = execsync('traceroute -m 20 -w 1 ' + req.query.value)
+            console.log(result + ' ');
+            res.send(result)
+            res.end()
+            
+        } catch (error) {
+            console.log(error + '');
+            res.end(`Error has ocurred: ${error}`)
+
+        }*/
+        /*exec('traceroute -m 20 -w 1 ' + req.query.value, (error, stdout, stderr) => {
+            if (error) {
               res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
               console.error(`exec error: ${error}`);
               res.end(`Error has ocurred: ${error}`)
               return;
-            }else{
-                let _result = []
-                let _http = []
-                let auxString = stdout.split('\n').map(value => value.match(/[^ |ms]+/g)).splice(1, stdout.length -1)
+            }else{ 
                 res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-                res.send('hola')
-                res.end()
-                
+                res.end(stdout)
             }
         })*/
-        
+        str = "";
+        res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+        const traceroute = spawn('traceroute',['-m', '20', '-w' ,'1', req.query.value] )
+        traceroute.stdout.on('data', (data) => {
+            str += data.toString();
 
+             var lines = str.split("\n");
+            for(var i in lines) {
+            if(i == lines.length - 1) {
+                str = lines[i];
+            } else{
+                res.write(lines[i] + "\n");
+            }
+        }
+            
+          });
+          traceroute.on('close', function (code, signal) {
+            console.log('child process exited with ' +
+                        `code ${code} and signal ${signal}`);
+                        res.end(str);                       
+        });
+        traceroute.stderr.on('data', function (data) {
+            res.end('stderr: ' + data);
+        });
 
+    
     }
     else if (req.query.option == 3) {
         console.log('dentro 3');
