@@ -76,11 +76,12 @@ export default {
        headers: [
       {
         text: 'IP',
-        align: 'center',
+        align: 'start',
         sortable: false,
         value: 'ip',
        },
        { text: 'Domain', value: 'domain' },
+       { text: 'Dirección MAC', value: 'mac' },
 
       ],
       desserts: [],
@@ -119,11 +120,12 @@ export default {
         axios
         .get('http://localhost:4000/scanCompleteNetwork', { params })
         .then(response =>{
-          console.log(response.data);
+          console.log(response.data[0].IP);
           for (let index = 0; index < response.data.length; index++) {
             this.desserts.push({
-              ip: response.data[index][0].IP,
-              domain: response.data[index][0].domain
+              ip: response.data[index].IP,
+              domain: response.data[index].domain,
+              mac: response.data[index].mac
             })  
           }
           

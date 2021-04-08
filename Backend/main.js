@@ -155,9 +155,41 @@ function resolveDomain(ip) {
                 res = stdout.split('name = ')
                 res = res[1].split('.\n')
                 result.push({IP: ip, domain: res[0]});
+                
             }
             
             resolve(result);
+        });
+    });
+}
+
+function resolveMacAddress(objectIP) {
+    return new Promise(function (resolve, reject) {
+        let shellCmd = 'arp -a ' + objectIP.IP;
+        exec(shellCmd, function (err, stdout, stderr) {
+            /*
+            if (err) {
+                console.log(err);
+            }*/
+            let result = {}
+            console.log(stdout);
+            let macAddress = stdout.split(' ')
+            if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(macAddress[3])) {
+                macAddress = macAddress[3]
+                result = {IP: objectIP.IP, domain: objectIP.domain, mac: macAddress}
+                resolve(result);
+
+            }
+            else{
+                exec(`ip link | grep ether | awk '{print $2}' | head -n 1`, function(err, stdout, stderr){
+                    
+                result = {IP: objectIP.IP, domain: objectIP.domain, mac: stdout.slice(0,stdout.length-1)}
+                resolve(result);
+
+                })
+            }
+           
+            //console.log(result);
         });
     });
 }
@@ -176,7 +208,7 @@ app.get('/scanCompleteNetwork', function(req, res){
         console.log('es red');
         ip = req.query.ip.slice(0,req.query.ip.length-1)
         for (let i = inicialRange; i < finalRange ; i++) {
-            console.log(ip+i);
+            //console.log(ip+i);
             promises.push(checkIp(ip + i));
         }
     }else{
@@ -187,7 +219,6 @@ app.get('/scanCompleteNetwork', function(req, res){
         console.log(inicialRange);
         finalRange = req.query.range -1
         for (let i = inicialRange; i <= finalRange +1; i++) {
-            console.log(ip+i);
             promises.push(checkIp(ip + i));
         }
     }
@@ -202,7 +233,18 @@ app.get('/scanCompleteNetwork', function(req, res){
             }
         }
         Promise.all(ipDomain).then(function (results) {
-            res.send(results)
+            let macAddress = []
+            for (let i = 0; i < results.length; i++) {
+                if(results[i][0] != null)
+                {
+                    //console.log(results[i][0]);
+                    macAddress.push(resolveMacAddress(results[i][0]))
+                }
+            }
+            Promise.all(macAddress).then(function (results){
+                console.log(results);
+                res.send(results)
+            })
         })
     });
 
