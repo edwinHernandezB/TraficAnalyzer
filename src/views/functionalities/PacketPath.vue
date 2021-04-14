@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-app-bar app clipped-left elevation="0" class="vAppBar" height="40" >
-      <v-app-bar-title>Ruta de paquete</v-app-bar-title>
+      <h4>Ruta de paquetes</h4>
     </v-app-bar>
     <v-row class="ml-1">
       <!-- Select option -->

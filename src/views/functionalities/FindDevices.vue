@@ -1,7 +1,7 @@
 <template>
 <v-container fluid>
   <v-app-bar  app clipped-left elevation="0"  class="vAppBar" height="40" >
-    <v-app-bar-title>Encontrar dispositivos connectados en la red</v-app-bar-title>
+        <h4>Encontrar dispositivos connectados en la red</h4>
   </v-app-bar>
     <v-row class="ml-1">
       <!-- Select option -->

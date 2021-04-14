@@ -1,7 +1,8 @@
 <template>
 <v-container fluid>
   <v-app-bar app clipped-left elevation="0" class="vAppBar" height="40" >
-    <v-app-bar-title>Comprobar Estado de una máquina</v-app-bar-title>
+    <h4>Comprobar Estado de una máquina</h4>
+    
   </v-app-bar>
  <!--Formulario-->
   <v-form >

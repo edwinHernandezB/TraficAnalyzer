@@ -2,7 +2,7 @@
   <v-container fluid>
   
     <v-app-bar  app clipped-left elevation="0" class="vAppBar" height="40" >
-      <v-app-bar-title>Ver Sockets activos</v-app-bar-title>
+      <h4>Ver Sockets activos</h4>
     </v-app-bar>
 
     <v-container fluid>

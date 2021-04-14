@@ -1,7 +1,7 @@
 <template>
 <v-container fluid>
   <v-app-bar  app clipped-left elevation="0" class="vAppBar" height="40" >
-    <v-app-bar-title>Conceptos de TCP</v-app-bar-title>
+    <h4>Conceptos de TCP</h4>
   </v-app-bar>
 
   <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit, et adipisci voluptate, quas sit, a quibusdam fugiat obcaecati voluptatum blanditiis unde. Magnam tempore quasi unde enim id ducimus modi fugiat! </h1>

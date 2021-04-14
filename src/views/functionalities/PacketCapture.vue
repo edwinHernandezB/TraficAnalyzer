@@ -1,7 +1,7 @@
 <template>
 <v-container fluid>
   <v-app-bar  app clipped-left elevation="0" class="vAppBar" height="40" >
-    <v-app-bar-title>Capturar paquetes</v-app-bar-title>
+    <h4>Capturar paquetes</h4>
   </v-app-bar>
   <!--Formulario-->
   <v-form >
