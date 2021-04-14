@@ -57,7 +57,6 @@ export default {
                     { title: 'Ruta de paquetes', icon: 'mdi-map-marker-multiple', action: 'PacketPath' },
                     { title: 'Dispositivos en la red', icon: 'mdi-lan', action: 'FindDevices' },
                     { title: 'Sockets activos', icon: 'mdi-lan-connect',action: 'ActiveSockets' },
-                    { title: 'Estadisticas', icon: 'mdi-chart-bar', action: 'Statistics' },
                 ],
                 groupTitle: 'Utilidades',
             },

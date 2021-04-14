@@ -36,11 +36,6 @@ const routes = [
     component: () => import(/* webpackChunkName: "ActiveSockets" */ '../views/functionalities/ActiveSockets.vue')
   },
   {
-    path: '/functionalities/Statistics',
-    name: 'Statistics',
-    component: () => import(/* webpackChunkName: "Statistics" */ '../views/functionalities/Statistics.vue')
-  },
-  {
     path: '/functionalities/TCPconcepts',
     name: 'TCPconcepts',
     component: () => import(/* webpackChunkName: "TCPconcepts" */ '../views/functionalities/TCPconcepts.vue')
