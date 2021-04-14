@@ -52,9 +52,9 @@ export default {
             {
                 groupIcon: 'mdi-hammer-wrench',
                 components: [
-                    { title: 'Captura de paquete', icon: 'mdi-mail', action: 'PacketCapture' },
-                    { title: 'Estado de conexión', icon: 'mdi-table-tennis', action: 'CheckConn' },
-                    { title: 'Ruta de paquete', icon: 'mdi-map-marker-multiple', action: 'PacketPath' },
+                    { title: 'Capturar paquetes', icon: 'mdi-mail', action: 'PacketCapture' },
+                    { title: 'Conexión de una máquina', icon: 'mdi-table-tennis', action: 'CheckConn' },
+                    { title: 'Ruta de paquetes', icon: 'mdi-map-marker-multiple', action: 'PacketPath' },
                     { title: 'Dispositivos en la red', icon: 'mdi-lan', action: 'FindDevices' },
                     { title: 'Sockets activos', icon: 'mdi-lan-connect',action: 'ActiveSockets' },
                     { title: 'Estadisticas', icon: 'mdi-chart-bar', action: 'Statistics' },

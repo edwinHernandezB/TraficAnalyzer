@@ -12,6 +12,19 @@
         </v-select>
       </v-col>
     </v-row>
+    <!-- Alert Info-->
+    <v-alert text v-if="hideInfoAlert" color="info" class="mt-2  ml-3">
+      <h4> Información sobre esta funcionalidad </h4>
+
+      <div>
+        Se utiliza la utilidad de Linux de <strong>ping</strong> para hacer un sondeo a todo el rango de IP's de la red o al rango especificado por el
+        usuario, de esta manera al recibir respuesta encontramos los diversos dispositivos conectados en la red en ese momento, además la utilidad de
+        <strong>nslookup</strong>  nos permite conocer el nombre del dispositivo asociado a esa IP y <strong>ARP (Address Resolution Protocol)</strong>
+        para encontrar la dirección fisíca (MAC) asociada a esta.
+            
+      </div>
+      <v-btn class="mt-1" color="info"  @click="hideInfoAlert = !hideInfoAlert" outlined>Aceptar</v-btn>
+    </v-alert>
     <v-form >
       <v-container fluid v-if="activeAction != ''">
         <!--Form de IP-->
@@ -48,8 +61,7 @@
           :search="search"
         ></v-data-table>
       </v-card>
-      <!-- Alerta de cancelación de proceso -->
-      <v-alert :value="errorData" type="error"> Proceso cancelado.</v-alert>
+      
       </v-container>
     </v-form>
 
@@ -71,6 +83,7 @@ export default {
       IP: '192.168.1.0',
       mask: 0,
       errorData: false,
+      hideInfoAlert: true,
       //---------- Table ---------------
        search: '',
        headers: [

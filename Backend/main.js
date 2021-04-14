@@ -2,7 +2,7 @@ const {spawn} = require('child_process');
 const execsync = require('child_process').execSync
 const cors = require('cors');
 const dns = require('dns');
-
+const fs = require('fs')
 let exec = require('child_process').exec;
 express = require("express"),
 app = express();
@@ -248,6 +248,33 @@ app.get('/scanCompleteNetwork', function(req, res){
         })
     });
 
+})
+
+
+app.get('/capturePackage', function(req, res){
+    res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+    console.log(req.query.typeOfPacket);
+    console.log(req.query.nPackets);
+    let packetType = 'tcp'
+    cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' 1> /dev/null > tcpdump.txt'
+
+    if (req.query.typeOfPacket == 1) {
+        packetType = 'udp'
+        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' ' + packetType + ' 1> /dev/null > tcpdump.txt'
+    }else if(req.query.typeOfPacket == 2){
+        packetType = 'icmp'
+        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' 1> /dev/null > tcpdump.txt'
+    }
+
+    exec(cmdShell,(err,stdout,stderr)=>{
+   // exec('tcpdump -nn -c '+ req.query.nPackets + ' -v tcp 1> /dev/null > tcpdump.txt',(err,stdout,stderr)=>{
+        if (err) {
+            console.log(stderr, err);
+        }   
+        fs.readFile('tcpdump.txt', 'utf-8', (err, data)=>{
+            res.end(data)
+        })
+    })
 })
   
 
