@@ -85,8 +85,7 @@ export default {
 .vNavDrawer{
   position:fixed;
 }
-.vListGroup{
-}
+
 .vListIten{
   text-decoration: none;
 }
