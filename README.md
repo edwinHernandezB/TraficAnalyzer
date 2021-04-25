@@ -34,7 +34,7 @@ npm run serve
 ############################################
 ```
 
-### Compiles and minifies for production
+### Compiles and minifies for production (Optional if you don't use the previous npm run serve)
 ```
 npm run build
 ```
