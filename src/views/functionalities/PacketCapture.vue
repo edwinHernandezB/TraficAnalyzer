@@ -59,7 +59,7 @@
       </v-card>
     <v-container fluid>
      <strong>Indicaciones</strong> <br>
-      <h7>
+      <h5>
         [S]  Solicitud de establecimiento de sesión. <br>
         [S.] Paquete Syn-ACK <br>
         [.] Ningún flag, generalmente utilizado para ACK.<br>
@@ -67,7 +67,7 @@
         [R]  Interrupción inmediata de la conexión. <br>
         [A]  Confirmar paquete, reconocer los datos del remitente.  <br>
         [P]  Push, envío inmediato de datos al remitente. <br>
-      </h7>
+      </h5>
     </v-container>
        
 </v-container>

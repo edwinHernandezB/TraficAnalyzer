@@ -112,7 +112,6 @@
         </v-col>           
         </v-row>
 
-       
       
       </v-container>
     </v-container>
@@ -186,6 +185,7 @@ export default {
         data: []
       }],
       stats : [],
+      prueba: [],
       //---------Donut Chart Packages---------------
       optionsPackage: {
         labels: ['Total entregados', 'Total Perdidos']
@@ -197,9 +197,29 @@ export default {
   methods: {
     ejecutar: function(){
       
-      this.cancelSource = axios.CancelToken.source();
-      this.changeState()
+        this.cancelSource = axios.CancelToken.source();
+        this.changeState()
+   /*   let evtSource = new EventSource("http://localhost:4000/ping");
 
+     
+
+      evtSource.onmessage = (e) =>{
+          console.log("received event");
+          console.log(e);
+          this.prueba.push(e.data)
+          let str = e.data.toString()
+          str = str.split()
+         
+          console.log(str);
+      };      
+
+      evtSource.onerror = function(e) {
+          console.log("EventSource failed.");
+          console.log(e.data);
+      };
+
+      console.log(evtSource);*/
+      
       axios
       .get('http://localhost:4000/ping?ip=' + this.IP + '&' + 'count=' + this.totalPackage, {cancelToken: this.cancelSource.token})
       .then(response => {

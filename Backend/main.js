@@ -26,7 +26,44 @@ app.get('/ping', function(req, res){
     });
  
 })
+/*
+var cp = require("child_process")
 
+app.get('/ping', function(req, res){
+    res.writeHead(200, { "Content-Type": "text/event-stream",
+    "Cache-control": "no-cache" });
+
+    var spw = cp.spawn('ping', ['-c', '2', '80.80.80.80']),
+    str = "";
+
+    spw.stdout.on('data', function (data) {
+    str += data.toString();
+
+    // just so we can see the server is doing something
+    console.log(data + '');
+
+    // Flush out line by line.
+    var lines = str.split("\n");
+    for(var i in lines) {
+        if(i == lines.length - 1) {
+        str = lines[i];
+        } else{
+        // Note: The double-newline is *required*
+        res.write('data: ' + lines[i] + "\n\n");
+        }
+    }
+
+    });
+    spw.stdout.on('error', (err) => {
+    console.log('Error: '+ err);
+    });
+
+    spw.stdout.on('close', function (code, signal) {
+    console.log('finish process');
+    });
+ 
+})
+*/
 app.get('/activeSockets', function(req, res){
     console.log(req.query.netstatOptions);
     exec('netstat -' + req.query.netstatOptions, (error, stdout, stderr) => {
