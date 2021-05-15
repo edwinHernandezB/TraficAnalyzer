@@ -58,7 +58,7 @@ export default {
                     { title: 'Dispositivos en la red', icon: 'mdi-lan', action: 'FindDevices' },
                     { title: 'Sockets activos', icon: 'mdi-lan-connect',action: 'ActiveSockets' },
                 ],
-                groupTitle: 'Utilidades',
+                groupTitle: 'Funcionalidades',
             },
             {
                 groupIcon: 'mdi-cube',
