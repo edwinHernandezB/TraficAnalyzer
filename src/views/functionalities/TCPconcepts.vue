@@ -124,16 +124,8 @@ export default {
         this.table = []
         this.startSimulation = 'Detener'
         this.isStartSimulation = true
-        //let HostA = new TCPSettings(Math.floor(Math.random() * 101), this.hostAMss, this.hostAWindow, this.hostABytesTotales, 'Host A') //seq, mss, window, totalBytes
-        let Amss = this.hostAMss
-        let Atotalbytes =  this.hostABytesTotales
-        let Awindow = this.hostAWindow
-        let Bmss = this.hostBMss
-        let Btotalbytes =  this.hostBBytesTotales
-        let Bwindow = this.hostBWindow
-        //let HostB = new TCPSettings(Math.floor(Math.random() * 101), this.hostBMss, this.hostBWindow, this.hostBBytesTotales, 'Host B')//seq, mss, window, totalBytes
+    
         let HostA = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostAMss), parseInt(this.hostAWindow), parseInt(this.hostABytesTotales), 'Host A') //seq, mss, window, totalBytes
-
         let HostB = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostBMss), parseInt(this.hostBWindow), parseInt(this.hostBBytesTotales), 'Host B')//seq, mss, window, totalBytes
 
         //TCP conection
