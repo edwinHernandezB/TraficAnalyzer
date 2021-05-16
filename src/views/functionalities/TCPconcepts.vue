@@ -1,14 +1,46 @@
 <template>
 <v-container fluid>
   <v-app-bar  app clipped-left elevation="0" class="vAppBar" height="40" >
-    <h4>Conceptos de TCP</h4>
+    <h4>Simulación TCP</h4>
   </v-app-bar>
-  <v-container>
-    <v-img src="src\static\monitorT.png" aspect-ratio="1.7"></v-img>
+  <v-container  class="mt-5">
+    <v-row>
+      <v-col>
+   <v-row cols="12" >
+          <v-text-field dense type="number" v-model="hostAMss" :rules="rulesIP"  label="Maximum Size Segment (MSS)" required></v-text-field>
+        </v-row>
+          <v-row cols="12">
+          <v-text-field dense type="number"  v-model="hostAWindow" :rules="rulesIP"  label="Tamaño de la ventana" required></v-text-field>
+        </v-row>
+        <v-row cols="12">
+          <v-text-field dense type="number" v-model="hostABytesTotales" :rules="packageRules" label="nº bytes totales a enviar" required ></v-text-field>
+        </v-row>  
+      </v-col>  
+      <v-col>
+    <v-img  :src="require('./static/monitorT.png')"   max-height="400"
+           max-width="400" ></v-img>
+      </v-col>
+      <v-col>
+   <v-row cols="12" >
+          <v-text-field dense type="number" v-model="hostBMss" :rules="rulesIP"  label="Maximum Size Segment (MSS)" required></v-text-field>
+        </v-row>
+          <v-row cols="12">
+          <v-text-field dense type="number" v-model="hostBWindow" :rules="rulesIP"  label="Tamaño de la ventana" required></v-text-field>
+        </v-row>
+        <v-row cols="12">
+          <v-text-field dense type="number" v-model="hostBBytesTotales" :rules="packageRules" label="nº bytes totales a enviar" required ></v-text-field>
+        </v-row>  
+      </v-col>  
+       
+    </v-row>
+     <v-col md="2">
+                <v-text-field dense type="number" v-model="totalPackage" :rules="packageRules" label="Tasa de perdida (%)" required ></v-text-field>
+    </v-col>
   </v-container>
-  <v-container>
-      <v-btn @click="startsimulation">{{startSimulation}}</v-btn>
-      <v-btn @click="isPauseSimulation = !isPauseSimulation">{{pauseSimulation}}</v-btn>
+
+  <v-container fluid>
+      <v-btn :color="startColor" class="mb-2 mr-2" @click="startsimulation">{{startSimulation}}</v-btn>
+      <v-btn :color="pauseColor" class="mb-2 mr-2" @click="isPauseSimulation = !isPauseSimulation">{{pauseSimulation}}</v-btn>
       <v-data-table
         v-model="selected" :headers="headers" :items="table" :single-select="singleSelect"
         item-key="id" show-select class="elevation-1">    
@@ -19,11 +51,22 @@
 
 <script>
 // @ is an alias to /src
-import TCPSettings from '/Ing. Informática 4to Curso/2n Semestre/TFG/TraficAnalyzer/TraficAnalyzer/public/tcpSimulation'
+import TCPSettings from "./tcpSimulation"
 export default {
   name: 'TCPconcepts',
   data() {
     return {
+      //Host A
+      hostAMss: 0,
+      hostAWindow: 0,
+      hostABytesTotales: 0,
+      //Host B
+      hostBMss: 0, 
+      hostBWindow: 0, 
+      hostBBytesTotales: 0,
+
+      startColor: 'success',
+      pauseColor: 'warning',
       simulation: [],
       startSimulation: 'Comenzar',
       isStartSimulation: false,
@@ -55,8 +98,17 @@ export default {
     isPauseSimulation: function() {
       if (this.isPauseSimulation) {
         this.pauseSimulation = 'Reanudar'
+        this.pauseColor = 'info'
       }else{
         this.pauseSimulation = 'Pausar'
+        this.pauseColor = 'warning'
+      }
+    },
+    isStartSimulation: function(){
+      if (!this.isStartSimulation) {
+        this.startColor = 'success'
+      }else{
+        this.startColor = 'error'
       }
     }
   },
@@ -65,13 +117,24 @@ export default {
       if(this.isStartSimulation){
         this.startSimulation = 'Comenzar'
         this.isStartSimulation = false
+        this.simulation = []
+        
       }
       else{
+        this.table = []
         this.startSimulation = 'Detener'
         this.isStartSimulation = true
-        let HostA = new TCPSettings(3, 4, 10, 11, 'HostA') //seq, mss, window, totalBytes
+        //let HostA = new TCPSettings(Math.floor(Math.random() * 101), this.hostAMss, this.hostAWindow, this.hostABytesTotales, 'Host A') //seq, mss, window, totalBytes
+        let Amss = this.hostAMss
+        let Atotalbytes =  this.hostABytesTotales
+        let Awindow = this.hostAWindow
+        let Bmss = this.hostBMss
+        let Btotalbytes =  this.hostBBytesTotales
+        let Bwindow = this.hostBWindow
+        //let HostB = new TCPSettings(Math.floor(Math.random() * 101), this.hostBMss, this.hostBWindow, this.hostBBytesTotales, 'Host B')//seq, mss, window, totalBytes
+        let HostA = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostAMss), parseInt(this.hostAWindow), parseInt(this.hostABytesTotales), 'Host A') //seq, mss, window, totalBytes
 
-        let HostB = new TCPSettings(100, 2, 8, 20, 'HostB')//seq, mss, window, totalBytes
+        let HostB = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostBMss), parseInt(this.hostBWindow), parseInt(this.hostBBytesTotales), 'Host B')//seq, mss, window, totalBytes
 
         //TCP conection
         HostA.sendSynSegment(HostB, this.simulation);
@@ -101,6 +164,8 @@ export default {
         let timer2 = (simulation, index)=>{
           if (!this.isStartSimulation) {
             this.pauseSimulation = 'Pausar'
+            this.pauseColor = 'warning'
+            this.isPauseSimulation = !this.isPauseSimulation
             return
           }
           if (this.isPauseSimulation) {

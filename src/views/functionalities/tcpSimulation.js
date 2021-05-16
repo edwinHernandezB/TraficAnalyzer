@@ -69,7 +69,6 @@ export default class TCPSettings {
     sendDataSegment(dstHost, simulation){
         console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
         //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
-       // console.log(' totalBytes: '+this.totalBytes +'bytesToSend: '+this.bytesToSend  );
         if (this.totalBytes >= this.bytesToSend) {
             this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
             dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen        
@@ -78,14 +77,10 @@ export default class TCPSettings {
             this.totalBytes -= this.bytesToSend;
             dstHost.totalDstBytes = this.bytesToSend
         }
+
         dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        
-        this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
-       // console.log(`${this.hostName} ack: ${this.ack}, seq: ${this.seq}`)
-        //console.log(`${dstHost.hostName} ack: ${dstHost.ack}, seq: ${dstHost.seq}`)
-        //console.log(this.totalBytes);
         simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
-        //console.log(simulation);
+        this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
     }
 
@@ -138,45 +133,3 @@ export default class TCPSettings {
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯`);
     }
 }
-
-
-
-//MSS: Máximo tamaño de segmente: Bytes totales que se pueden enviar por segmento
-//Window
-/*
-let HostA = new TCPSettings(3, 4, 10, 11, 'HostA') //seq, mss, window, totalBytes
-
-let HostB = new TCPSettings(100, 2, 8, 20, 'HostB')//seq, mss, window, totalBytes
-
-//TCP conection
-HostA.sendSynSegment(HostB, simulation);
-HostB.sendSynAck(HostA, simulation);
-HostA.sendAck(HostB, simulation);
-
-
-let timer = async function(){
-    HostA.sendDataSegment(HostB, simulation)
-    HostB.sendAckSegment(HostA, simulation)
-    if (HostA.totalBytes == 0) {
-        HostA.connectionEnded = true;
-        HostB.connectionEnded = true;
-    }
-    !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
-}
-
-let finish = function(){
-    HostA.sendFinSegment(HostB, simulation)
-    HostB.sendFinAckSegment(HostA, simulation)
-    HostA.sendCloseConnection(HostB, simulation)
-}
- timer()
-
-
-let index = 0
-let timer2 = function(simulation, index){
-    console.log(simulation[index])
-    index++;
-    index < simulation.length ? setTimeout(()=>timer2(simulation, index), 1000) : 0
-}
-timer2(simulation, index)
-*/
