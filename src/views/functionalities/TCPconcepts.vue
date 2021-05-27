@@ -7,13 +7,13 @@
     <v-row>
       <v-col>
    <v-row cols="12" >
-          <v-text-field dense type="number" v-model="hostAMss" :rules="rulesIP"  label="Maximum Size Segment (MSS)" required></v-text-field>
+          <v-text-field dense type="number" v-model="hostAMss" :rules="rulesHostA"  label="Maximum Size Segment (MSS)" required></v-text-field>
         </v-row>
           <v-row cols="12">
-          <v-text-field dense type="number"  v-model="hostAWindow" :rules="rulesIP"  label="Tamaño de la ventana" required></v-text-field>
+          <v-text-field dense type="number"  v-model="hostAWindow" :rules="rulesHostA"  label="Tamaño de la ventana" required></v-text-field>
         </v-row>
         <v-row cols="12">
-          <v-text-field dense type="number" v-model="hostABytesTotales" :rules="packageRules" label="nº bytes totales a enviar" required ></v-text-field>
+          <v-text-field dense type="number" v-model="hostABytesTotales" :rules="rulesHostA" label="nº bytes totales a enviar" required ></v-text-field>
         </v-row>  
       </v-col>  
       <v-col>
@@ -22,19 +22,19 @@
       </v-col>
       <v-col>
    <v-row cols="12" >
-          <v-text-field dense type="number" v-model="hostBMss" :rules="rulesIP"  label="Maximum Size Segment (MSS)" required></v-text-field>
+          <v-text-field dense type="number" v-model="hostBMss" :rules="rulesHostB"  label="Maximum Size Segment (MSS)" required></v-text-field>
         </v-row>
           <v-row cols="12">
-          <v-text-field dense type="number" v-model="hostBWindow" :rules="rulesIP"  label="Tamaño de la ventana" required></v-text-field>
+          <v-text-field dense type="number" v-model="hostBWindow" :rules="rulesHostB"  label="Tamaño de la ventana" required></v-text-field>
         </v-row>
         <v-row cols="12">
-          <v-text-field dense type="number" v-model="hostBBytesTotales" :rules="packageRules" label="nº bytes totales a enviar" required ></v-text-field>
+          <v-text-field dense type="number" v-model="hostBBytesTotales" :rules="rulesHostB" label="nº bytes totales a enviar" required ></v-text-field>
         </v-row>  
       </v-col>  
        
     </v-row>
      <v-col md="2">
-                <v-text-field dense type="number" v-model="totalPackage" :rules="packageRules" label="Tasa de perdida (%)" required ></v-text-field>
+                <v-text-field dense type="number" v-model="tasaPerdida" :rules="rulesLossRate" label="Tasa de perdida (%)" required ></v-text-field>
     </v-col>
   </v-container>
 
@@ -56,6 +56,21 @@ export default {
   name: 'TCPconcepts',
   data() {
     return {
+      rulesHostA:[
+        v => {if(v < 0){this.hostAMss = 0} return true},
+        v => {if(v < 0){this.hostAWindow = 0} return true},
+        v => {if(v < 0){this.hostABytesTotales = 0} return true},
+      
+      ],
+      rulesHostB:[
+        v => {if(v < 0){this.hostBMss = 0} return true},
+        v => {if(v < 0){this.hostBWindow = 0} return true},
+        v => {if(v < 0){this.hostBBytesTotales = 0} return true},
+      ],
+      rulesLossRate:[
+        v => {if(v < 0){this.tasaPerdida = 0} return true},
+      ],
+      
       //Host A
       hostAMss: 0,
       hostAWindow: 0,
@@ -64,6 +79,8 @@ export default {
       hostBMss: 0, 
       hostBWindow: 0, 
       hostBBytesTotales: 0,
+
+      tasaPerdida: 0,
 
       startColor: 'success',
       pauseColor: 'warning',
@@ -113,6 +130,15 @@ export default {
     }
   },
   methods: {
+   
+    lossPacket: function(HostA, HostB, simulation, lossRate){      
+      if (Math.random() > lossRate) {
+          HostA.sendLossDataSegment(HostB, simulation) 
+          this.lossPacket(HostA, HostB, simulation, lossRate)
+      }else{
+          HostB.sendAckSegment(HostA, simulation)
+      }
+    },
     startsimulation: function(){
       if(this.isStartSimulation){
         this.startSimulation = 'Comenzar'
@@ -135,17 +161,16 @@ export default {
 
 
         let timer = async ()=>{
-            
-            if (HostA.totalBytes == 0) {
-                HostA.connectionEnded = true;
-                HostB.connectionEnded = true;
-            }
-            else{
+        
+          if (HostA.totalBytes == 0) {
+              HostA.connectionEnded = true;
+              HostB.connectionEnded = true;
+          }else{
               HostA.sendDataSegment(HostB, this.simulation)
-              HostB.sendAckSegment(HostA, this.simulation)
-            }
-            !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
-        }
+              this.lossPacket(HostA, HostB, this.simulation, 0.8)
+          }
+          !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
+      }
 
         let finish = ()=>{
             HostA.sendFinSegment(HostB, this.simulation)

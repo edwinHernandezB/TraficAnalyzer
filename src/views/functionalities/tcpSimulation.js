@@ -23,9 +23,7 @@ export default class TCPSettings {
         this.dstRmBytes = 0;
     }
 
-    restar(){
-        console.log(this.totalBytes-=200)
-    } 
+
     // TCP connection
     sendSynSegment(dstHost, simulation){
         console.log(`${this.hostName} envia a ${dstHost.hostName} paquete SYN:`);
@@ -63,7 +61,7 @@ export default class TCPSettings {
         dstHost.seq +=1
         dstHost.printSegment(this.flagDst, this.ack, this.seq, 0)
         simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack,  bytes:0})
-        //console.log(simulation);
+        console.log(this.dstWindow, dstHost.dstWindow);
     }
 
     sendDataSegment(dstHost, simulation){
@@ -82,6 +80,12 @@ export default class TCPSettings {
         simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
         this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
+    }
+    sendLossDataSegment(dstHost, simulation){
+        console.log(`${this.hostName} reenvia un paquete de datos a ${dstHost.hostName}`);
+        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
+        dstHost.printSegment(this.flagDst, this.ack, this.seq - this.bytesToSend, this.bytesToSend)
+        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
     }
 
     sendAckSegment(dstHost, simulation){
