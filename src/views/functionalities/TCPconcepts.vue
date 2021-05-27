@@ -135,11 +135,14 @@ export default {
 
 
         let timer = async ()=>{
-            HostA.sendDataSegment(HostB, this.simulation)
-            HostB.sendAckSegment(HostA, this.simulation)
+            
             if (HostA.totalBytes == 0) {
                 HostA.connectionEnded = true;
                 HostB.connectionEnded = true;
+            }
+            else{
+              HostA.sendDataSegment(HostB, this.simulation)
+              HostB.sendAckSegment(HostA, this.simulation)
             }
             !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
         }
