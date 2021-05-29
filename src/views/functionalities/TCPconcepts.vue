@@ -69,6 +69,7 @@ export default {
       ],
       rulesLossRate:[
         v => {if(v < 0){this.tasaPerdida = 0} return true},
+        v => {if(v > 1){this.tasaPerdida = 1} return true},
       ],
       
       //Host A
@@ -131,8 +132,9 @@ export default {
   },
   methods: {
    
-    lossPacket: function(HostA, HostB, simulation, lossRate){      
-      if (Math.random() > lossRate) {
+    lossPacket: function(HostA, HostB, simulation, lossRate){  
+      console.log('sdsadsadsad' + lossRate)    
+      if (Math.random() <= lossRate) {
           HostA.sendLossDataSegment(HostB, simulation) 
           this.lossPacket(HostA, HostB, simulation, lossRate)
       }else{
@@ -167,7 +169,7 @@ export default {
               HostB.connectionEnded = true;
           }else{
               HostA.sendDataSegment(HostB, this.simulation)
-              this.lossPacket(HostA, HostB, this.simulation, 0.8)
+              this.lossPacket(HostA, HostB, this.simulation, this.tasaPerdida)
           }
           !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
       }
