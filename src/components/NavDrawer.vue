@@ -63,7 +63,7 @@ export default {
             {
                 groupIcon: 'mdi-cube',
                 components: [
-                    { title: 'Pildora de conceptos TCP', icon: 'mdi-pill', action: 'TCPconcepts' },
+                    { title: 'Simulación TCP', icon: 'mdi-lan-connect', action: 'TCPconcepts' },
                     { title: 'The Mother Of All Problems', icon: 'mdi-school', action: 'MotherAllProblems' },
                 ],
                 groupTitle: 'Simulaciones'
