@@ -1,15 +1,16 @@
 <template>
 <v-container fluid>
-  
+
    <v-container fluid> 
-     <v-col>
-       <v-row>
-          <v-img  class="mt-2 mb-2"  style="margin-left: 500px"
+      <v-img class="mt-2 mb-2"  style="margin-left: 500px"
                 src="../assets/TraficAnalyzer_izq_logo.png"
                 max-height="720"
                 max-width="400"
                 >
           </v-img>
+     <v-col>
+       <v-row>
+         
        </v-row>
        <v-row>
         <h2 class="font-weight-black mb-4" style="margin-left: 250px">Herramienta para el análisis y simulaciones de redes de datos </h2>
