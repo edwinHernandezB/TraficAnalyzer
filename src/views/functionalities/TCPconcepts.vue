@@ -27,9 +27,9 @@
           <v-row cols="12">
           <v-text-field dense type="number" v-model="hostBWindow" :rules="rulesHostB"  label="Tamaño de la ventana" required></v-text-field>
         </v-row>
-       <!-- <v-row cols="12">
+       <v-row cols="12">
           <v-text-field dense type="number" v-model="hostBBytesTotales" :rules="rulesHostB" label="nº bytes totales a enviar" required ></v-text-field>
-        </v-row> -->  
+        </v-row>  
       </v-col>  
        
     </v-row>
@@ -100,6 +100,7 @@ export default {
           sortable: false,
           value: 'num',
         },
+         { text: 'Time (HH:MM:SS:MS)', value: 'date' },
          { text: 'Host', value: 'host' },
          { text: 'Flags', value: 'flag' },
          { text: 'Sequence', value: 'seq' },
@@ -155,7 +156,7 @@ export default {
               console.log('Entro a burst else sendataSegmentSlidingWindow')
               HostA.dstWindowCount = HostA.dstWindow
               HostA.sendDataSegment(HostB, simulation)
-              HostB.sendBurstAckSegment(HostA, simulation)
+              HostB.sendAckSegment(HostA, simulation)
           }
           HostA.dstWindowCount >= HostA.bytesToSend ? this.sendBurstSegment(HostA, HostB, simulation): HostB.sendBurstAckSegment(HostA, simulation)
 
@@ -189,20 +190,38 @@ export default {
 
         let timer = async ()=>{
         
-          if (HostA.totalBytes == 0) {
+          console.log('Bytes restantes de A antes de finalizar: ', HostA.totalBytes)
+          console.log('Bytes restantes de B antes de finalizar: ', HostB.totalBytes)
+          if (HostA.totalBytes == 0 && HostB.totalBytes == 0) {
               HostA.connectionEnded = true;
               HostB.connectionEnded = true;
           }else{
-              //HostA.sendDataSegment(HostB, this.simulation)
-              //this.lossPacket(HostA, HostB, this.simulation, this.tasaPerdida)
-
               if(Math.random() >= 0.5){
-                  this.sendBurstSegment(HostA, HostB, this.simulation)
+                  if (Math.random() >= 0.5) {
+                      if (HostA.totalBytes != 0) {                
+                          this.sendBurstSegment(HostA, HostB, this.simulation)
+                      }    
+                  } else {
+                      if (HostB.totalBytes != 0) {                
+                          this.sendBurstSegment(HostB, HostA, this.simulation)
+                      }
+                  }
+                  
               }else{
-                  HostA.sendDataSegment(HostB, this.simulation)
-                  this.lossPacket(HostA, HostB, this.simulation, this.tasaPerdida)
+                  if (Math.random() >= 0.5) {
+                      if (HostA.totalBytes != 0) {                
+                          HostA.sendDataSegment(HostB, this.simulation)
+                          this.lossPacket(HostA, HostB, this.simulation, 0.8)    
+                      }
+                  }
+                  else{
+                      if (HostB.totalBytes != 0) {                
+                          HostB.sendDataSegment(HostA, this.simulation)
+                          this.lossPacket(HostB, HostA, this.simulation, 0.8)
+                      }
+                  }
               }
-              
+            
           }
           !HostA.connectionEnded && !HostB.connectionEnded ? timer():finish()
       }
@@ -228,7 +247,7 @@ export default {
           }else{
 
             console.log(simulation[index])
-            this.table.push({num: index, host: simulation[index].host, flag: simulation[index].flag, seq: simulation[index].seq,
+            this.table.push({num: index, date: simulation[index].date, host: simulation[index].host, flag: simulation[index].flag, seq: simulation[index].seq,
             ack: simulation[index].ack, bytes: simulation[index].bytes })
             index++;
             index < simulation.length ? setTimeout(()=>timer2(simulation, index), 1000) : 0

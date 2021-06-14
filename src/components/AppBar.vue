@@ -18,7 +18,7 @@
         
     </v-app-bar>
     <v-app-bar  clipped class="vAppBar" height="40" >
-        <h3>Home</h3>
+        <h4>Home</h4>
     </v-app-bar>
     <NavDrawer></NavDrawer>
   

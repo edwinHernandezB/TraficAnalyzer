@@ -15,6 +15,8 @@ export default class TCPSettings {
         this.connectionEnded = false;
         this.simulation = []
         this.ackCountSlidindWindow = 0;
+        this.srcTimer = '-'
+        this.rtt = 0
         //Destination
         this.dstSeq = 0;
         this.dstMSS = 0;
@@ -36,7 +38,10 @@ export default class TCPSettings {
         dstHost.dstSeq = this.seq;
         dstHost.flagDst = this.flag;
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date();
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        console.log(this.srcTimer)
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -49,8 +54,12 @@ export default class TCPSettings {
         dstHost.dstSeq = this.seq;
         dstHost.flagDst = 'SYN-ACK';
         this.ack = this.dstSeq + 1;
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        console.log(this.srcTimer)
+        this.rtt = Math.abs(this.srcTimer - dstHost.srcTimer)
         dstHost.printSegment(dstHost.flagDst, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
 
     }
@@ -60,67 +69,22 @@ export default class TCPSettings {
         //dstHost.dstWindow = this.window;
         //dstHost.dstMSS = this.mss;
         this.flagDst = 'ACK';
+        dstHost.flagDst = 'ACK'
         this.seq += 1;
         this.ack = dstHost.seq + 1;
         dstHost.seq +=1
         dstHost.printSegment(this.flagDst, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack,  bytes:0})
-        console.log(this.dstWindow, dstHost.dstWindow);
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack,  bytes:0})
+        //console.log(this.dstWindow, dstHost.dstWindow);
     }
-
- 
-    /*sendDataSegment(dstHost, simulation){
-        console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
-        if (this.totalBytes >= this.bytesToSend) {
-            this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-            dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen        
-        }else{
-            this.bytesToSend = this.totalBytes;
-            this.totalBytes -= this.bytesToSend;
-            dstHost.totalDstBytes = this.bytesToSend
-        }
-        dstHost.ackCountSlidindWindow = this.bytesToSend;
-        dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
-        this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
-
-    } 
     sendDataSegment(dstHost, simulation){
         console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
+    
         console.log('this.totalBytes >= this.bytesToSend'+this.totalBytes +' '+this.bytesToSend)
         if (this.totalBytes >= this.bytesToSend) {
-            console.log('this.dstMSS >= this.dstWindow' + this.dstMSS +' '+ this.dstWindow);
-            if (dstHost.mss >= dstHost.window) {
-                this.bytesToSend = dstHost.window
-                this.totalBytes -= this.bytesToSend // Resto el número de bytes enviados al total de bytes que tengo que enviar
-                dstHost.totalDstBytes = this.bytesToSend //Registro en el host destino los bytes que se envían en el segmento desde origen        
-       
-            }else{
-                this.bytesToSend = dstHost.mss;
-                this.totalBytes -= this.bytesToSend;
-                dstHost.totalDstBytes = this.bytesToSend
-            }
-        }else{
-            this.bytesToSend = this.totalBytes;
-            this.totalBytes -= this.bytesToSend;
-            dstHost.totalDstBytes = this.bytesToSend
-        }
-       
-        dstHost.ackCountSlidindWindow = this.bytesToSend;
-        //dstHost.ack += this.bytesToSend
-        dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
-        this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
-
-    }*/
-    sendDataSegment(dstHost, simulation){
-        console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
-        console.log('this.totalBytes >= this.bytesToSend'+this.totalBytes +' '+this.bytesToSend)
-        if (this.totalBytes >= this.bytesToSend) {
-            console.log('this.dstMSS >= this.dstWindow' + this.dstMSS +' '+ this.dstWindow);
+            console.log('dstHost.mss >= dstHost.window' + this.dstMSS +' '+ this.dstWindow);
             if (dstHost.mss >= dstHost.window) {
                 this.bytesToSend = dstHost.window
                 this.totalBytes -= this.bytesToSend // Resto el número de bytes enviados al total de bytes que tengo que enviar
@@ -146,15 +110,17 @@ export default class TCPSettings {
         }
        
         dstHost.ackCountSlidindWindow = this.bytesToSend;
-        //dstHost.ack += this.bytesToSend
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
         this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
     }
+    
     sendBurstDataSegment(dstHost, simulation){
         console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
+    
         if (this.totalBytes >= this.bytesToSend) {
             this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
             dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen        
@@ -165,89 +131,45 @@ export default class TCPSettings {
         }
         dstHost.ackCountSlidindWindow = this.bytesToSend;
         dstHost.ack += this.bytesToSend
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
         this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
     }
 
     sendBurstAckSegment(dstHost, simulation){
         console.log(`${this.hostName} envia un paquete de ACK a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
         this.flag = 'ACK'
-        //this.ack += this.totalDstBytes  // Sumo al ack el siguiente byte que quiero esperar
-        //this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-        this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
+
         dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
-        //this.seq += this.bytesToSend;
-        //dstHost.dstSeq += this.bytesToSend;
-        //dstHost.printSegment(this.flag, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
         dstHost.dstWindowCount = dstHost.dstWindow
-
     }
 
     sendLossDataSegment(dstHost, simulation){
         console.log(`${this.hostName} reenvia un paquete de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq - this.bytesToSend, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
-    }
-
-    sendataSegmentSlidingWindow(dstHost, simulation){
-        console.log(`${this.hostName} envia un paquete sliding de datos a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
-        
-        /*if (this.totalBytes >= this.bytesToSend) {
-            this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-            dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen        
-        }else{
-            this.bytesToSend = this.totalBytes;
-            this.totalBytes -= this.bytesToSend;
-            dstHost.totalDstBytes = this.bytesToSend
-        }*/
-        this.bytesToSend = this.dstWindowCount
-        this.totalBytes -= this.bytesToSend;
-        this.dstWindowCount = this.dstWindow
-        dstHost.totalDstBytes = this.bytesToSend
-        dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
-        this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
-
-    }
-
-    sendAckSlidingWindowSegment(dstHost, simulation){
-        console.log(`${this.hostName} envia un paquete de ACK sliding a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
-        this.flag = 'ACK'
-        //this.ack += this.totalDstBytes  // Sumo al ack el siguiente byte que quiero esperar
-        //this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-        this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-        dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen
-        dstHost.printSegment(this.flag, this.ack, this.seq, 0)
-        //this.seq += this.bytesToSend;
-        //dstHost.dstSeq += this.bytesToSend;
-        //dstHost.printSegment(this.flag, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
-        //console.log(simulation);
-        dstHost.dstWindowCount = dstHost.dstWindow
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
     }
 
     sendAckSegment(dstHost, simulation){
         console.log(`${this.hostName} envia un paquete de ACK a ${dstHost.hostName}`);
-        //this.bytesToSend = this.dstMSS; //Envío un segmento con el máximo numuero de bytes posibles según el mss destino
         this.flag = 'ACK'
         this.ack += this.totalDstBytes  // Sumo al ack el siguiente byte que quiero esperar
-        //this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
-        this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
+        
         dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
-        //this.seq += this.bytesToSend;
-        //dstHost.dstSeq += this.bytesToSend;
-        //dstHost.printSegment(this.flag, this.ack, this.seq, this.bytesToSend)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -256,7 +178,9 @@ export default class TCPSettings {
         this.flag = 'FIN';
         dstHost.flagDst = this.flag;
         this.printSegment(this.flag, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -265,7 +189,9 @@ export default class TCPSettings {
         this.flag = 'FIN-ACK';
         dstHost.flagDst = this.flag;
         this.printSegment(this.flag, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -274,7 +200,9 @@ export default class TCPSettings {
         this.flag = 'ACK';
         dstHost.flagDst = this.flag;
         this.printSegment(this.flag, this.ack, this.seq, 0)
-        simulation.push({host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let time = new Date()
+        this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
