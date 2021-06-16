@@ -9,18 +9,28 @@
                 >
           </v-img>
      <v-col>
+   
        <v-row>
-         
+        <h2 class="font-weight-black mb-2" style="margin-left: 250px">Herramienta para el análisis y simulaciones de redes de datos </h2>
+       </v-row>
+       <br>
+       <br>
+       <br>
+       <v-row>
+        <h2 class="font-weight-medium"  style="margin-left: 450px">Implementado con las tecnologias </h2>
        </v-row>
        <v-row>
-        <h2 class="font-weight-black mb-4" style="margin-left: 250px">Herramienta para el análisis y simulaciones de redes de datos </h2>
+       <v-col>
+         <v-img  style="margin-left: 350px"
+                src="../assets/tecnologias.png"
+                max-width="700"
+                >
+          </v-img>
+       </v-col>
        </v-row>
-       <v-row>
-        <h4 class="font-weight-black mb-4">¿Qué es TraficAnalyzer?</h4>
-<p class="font-weight-bold" style="font-size: 18px">Herramienta con interfaz gráfica desarrollada con el objetivo de proporcionar un programa que permite a los estudiantes explorar y 
-  reforzar los diferentes conceptos de redes vistos en clase. La herramienta consiste en dos bloques, las funcionalidades <v-icon>mdi-hammer-wrench</v-icon>, que sirven para el análisis del tráfico de la red y, las simulaciones <v-icon>mdi-cube</v-icon>,
-  que se utilizan para reforzar de manera práctica aquellos conceptos vistos en clase de problemas.</p>        
-       </v-row>
+       <br>
+       <br>
+       <v-container>
          <v-row>
         <h4 class="font-weight-black mb-4">¿Por qué TraficAnalyzer?</h4>
 <p class="font-weight-bold" style="font-size: 18px">A travez del tiempo se han ido desarrollando diversos programas en Linux para el análisis de la red, muchos de estos carecen
@@ -34,6 +44,7 @@
   otras dependencias de diseño de componentes, por este motivo el programa puede ser mejorado y rediseñado para que cada una de las funcionalidades puedan llegar a ser más completas o bien, 
   poder añadir nuevas funcionalidades y simulaciones.</p>        
        </v-row>
+       </v-container>
      </v-col>
 
    </v-container>

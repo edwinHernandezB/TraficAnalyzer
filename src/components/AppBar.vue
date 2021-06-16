@@ -15,7 +15,7 @@
         <v-btn icon @click="gitRepository">
             <v-icon dark large>mdi-github</v-icon>
         </v-btn>
-        <v-app-bar  class="vAppBar" elevation="0" height="40">
+        <v-app-bar  class="vAppBar" elevation="1" height="40">
             <h4>Home</h4>
         </v-app-bar>
     </v-app-bar>
