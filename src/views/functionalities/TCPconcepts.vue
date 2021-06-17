@@ -14,7 +14,10 @@
         </v-row>
         <v-row cols="12">
           <v-text-field dense type="number" v-model="hostABytesTotales" :rules="rulesHostA" label="nº bytes totales a enviar" required ></v-text-field>
-        </v-row>  
+        </v-row> 
+         <v-row cols="12">
+          <v-text-field dense type="number"  v-model="rttA" :rules="rulesHostA"  label="Max Round Trip Time" required></v-text-field>
+        </v-row>
       </v-col>  
       <v-col>
     <v-img  :src="require('./static/monitorT.png')"   max-height="400"
@@ -30,6 +33,9 @@
        <v-row cols="12">
           <v-text-field dense type="number" v-model="hostBBytesTotales" :rules="rulesHostB" label="nº bytes totales a enviar" required ></v-text-field>
         </v-row>  
+        <v-row cols="12">
+          <v-text-field dense type="number"  v-model="rttB" :rules="rulesHostA"  label="Max Round Trip Time (ms)" required></v-text-field>
+        </v-row>
       </v-col>  
        
     </v-row>
@@ -76,11 +82,12 @@ export default {
       hostAMss: 0,
       hostAWindow: 0,
       hostABytesTotales: 0,
+      rttA: 0,
       //Host B
       hostBMss: 0, 
       hostBWindow: 0, 
       hostBBytesTotales: 0,
-
+      rttB: 0,
       tasaPerdida: 0,
 
       startColor: 'success',
@@ -137,6 +144,7 @@ export default {
       console.log('sdsadsadsad' + lossRate)    
       if (Math.random() <= lossRate) {
           HostA.sendLossDataSegment(HostB, simulation) 
+          HostA.packetLoss = true
           this.lossPacket(HostA, HostB, simulation, lossRate)
       }else{
           HostB.sendAckSegment(HostA, simulation)
@@ -179,8 +187,8 @@ export default {
         this.startSimulation = 'Detener'
         this.isStartSimulation = true
     
-        let HostA = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostAMss), parseInt(this.hostAWindow), parseInt(this.hostABytesTotales), 'Host A') //seq, mss, window, totalBytes
-        let HostB = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostBMss), parseInt(this.hostBWindow), parseInt(this.hostBBytesTotales), 'Host B')//seq, mss, window, totalBytes
+        let HostA = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostAMss), parseInt(this.hostAWindow), parseInt(this.hostABytesTotales), 'Host A', parseInt(this.rttA)) //seq, mss, window, totalBytes
+        let HostB = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostBMss), parseInt(this.hostBWindow), parseInt(this.hostBBytesTotales), 'Host B', parseInt(this.rttB))//seq, mss, window, totalBytes
 
         //TCP conection
         HostA.sendSynSegment(HostB, this.simulation);

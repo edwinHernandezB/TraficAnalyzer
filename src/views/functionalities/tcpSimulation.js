@@ -2,7 +2,7 @@
 let simulation = []
 export default class TCPSettings {
 
-    constructor(seq, mss, window, totalBytes, hostName){
+    constructor(seq, mss, window, totalBytes, hostName, maxRTT){
         //Source
         this.seq = seq;
         this.mss = mss;
@@ -16,7 +16,6 @@ export default class TCPSettings {
         this.simulation = []
         this.ackCountSlidindWindow = 0;
         this.srcTimer = '-'
-        this.rtt = 0
         //Destination
         this.dstSeq = 0;
         this.dstMSS = 0;
@@ -25,9 +24,29 @@ export default class TCPSettings {
         this.flagDst = '-';
         this.totalDstBytes = 0;
         this.dstRmBytes = 0;
+
+        //Round Trip
+        if (maxRTT < 10) {
+          this.min = maxRTT
+        }
+        else{
+          this.min = maxRTT - 10
+        }
+        this.max = maxRTT
+        this.rtt = maxRTT
+        this.backoffRTT = maxRTT
+        this.listBackoffRTT = []
+        this.packetLoss = false
+
     }
 
+    calculateRTT(){
+        return Math.floor(Math.random() * (this.max - this.min + 1)) + this.min; 
+    }
 
+    calculateLossSegmentRTT(){
+        return Math.floor(Math.random() * ((this.max + 10) - this.max + 1)) + (this.max+1); 
+    }
     // TCP connection
     sendSynSegment(dstHost, simulation){
         console.log(`${this.hostName} envia a ${dstHost.hostName} paquete SYN:`);
@@ -40,8 +59,9 @@ export default class TCPSettings {
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date();
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
+        let rtt = this.calculateRTT()
         console.log(this.srcTimer)
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: '-', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -56,10 +76,10 @@ export default class TCPSettings {
         this.ack = this.dstSeq + 1;
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        console.log(this.srcTimer)
-        this.rtt = Math.abs(this.srcTimer - dstHost.srcTimer)
+        this.rtt = this.calculateRTT()
+        console.log(this.rtt)
         dstHost.printSegment(dstHost.flagDst, this.ack, this.seq, 0)
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: this.rtt + ' ms', host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
 
     }
@@ -76,7 +96,7 @@ export default class TCPSettings {
         dstHost.printSegment(this.flagDst, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack,  bytes:0})
+        simulation.push({date: '-', host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack,  bytes:0})
         //console.log(this.dstWindow, dstHost.dstWindow);
     }
     sendDataSegment(dstHost, simulation){
@@ -113,7 +133,7 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
+        simulation.push({date: '-', host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
         this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
     }
@@ -134,7 +154,7 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq, this.bytesToSend)
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
+        simulation.push({date: '-', host: this.hostName, flag:this.flagDst, seq:this.seq, ack:this.ack, bytes:this.bytesToSend})
         this.seq += this.bytesToSend; //Actualizo la secuencia aumentando los bytes enviados
 
     }
@@ -147,7 +167,8 @@ export default class TCPSettings {
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let calRTT = this.calculateRTT()
+        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
         dstHost.dstWindowCount = dstHost.dstWindow
     }
@@ -157,7 +178,22 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         dstHost.printSegment(this.flagDst, this.ack, this.seq - this.bytesToSend, this.bytesToSend)
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
+        if (this.packetLoss) {
+            //newTimeout =  * Timeout
+            this.backoffRTT = this.rtt
+            this.listBackoffRTT.push(this.rtt)
+            let timeout = this.calculateLossSegmentRTT();
+            this.rtt = 2 * timeout
+            this.max = 2 * timeout
+            this.packetLoss = false;
+        }else{
+            if(this.listBackoffRTT.length != 0){
+                this.rtt = this.listBackoffRTT.pop()
+                this.max = this.rtt
+            }
+            
+        }
+        simulation.push({date: this.rtt + ' ms', host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
     }
 
     sendAckSegment(dstHost, simulation){
@@ -169,7 +205,8 @@ export default class TCPSettings {
         dstHost.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let calRTT = this.calculateRTT()
+        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -180,7 +217,7 @@ export default class TCPSettings {
         this.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: '-', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -191,7 +228,8 @@ export default class TCPSettings {
         this.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        let calRTT = this.calculateRTT()
+        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -202,7 +240,7 @@ export default class TCPSettings {
         this.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: this.srcTimer, host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: '-', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
