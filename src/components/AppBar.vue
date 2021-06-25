@@ -21,12 +21,12 @@
     </v-app-bar>
    
     <NavDrawer></NavDrawer>
-  
 </v-container>
 </template>
 
 <script>
 import NavDrawer from './NavDrawer.vue'
+
 export default {
     name: 'AppBar',
     components: {

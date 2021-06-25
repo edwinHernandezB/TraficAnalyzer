@@ -26,17 +26,26 @@ export default class TCPSettings {
         this.dstRmBytes = 0;
 
         //Round Trip
-        if (maxRTT < 10) {
-          this.min = maxRTT
-        }
-        else{
-          this.min = maxRTT - 10
-        }
-        this.max = maxRTT
-        this.rtt = maxRTT
-        this.backoffRTT = maxRTT
+        //this.RTO = 1 //Tiempo de espera de retransmisión
+        this.SRTT //Tiempo de ida y vuelta suavizado
+        this.RTTVAR //Ida y vuelta variación de tiempo   //asumimos grnaularidad reloj G segundos
+        this.R = 0
+        
+            this.SRTT = maxRTT
+            this.RTTVAR = maxRTT / 2
+            this.RTO = this.SRTT + Math.max(6, 4*this.RTTVAR)
+            this.max = this.RTO
+            if (maxRTT < 10) {
+                this.min = maxRTT - 5
+            } else {
+                this.min = maxRTT - 10
+            }
+        this.backoffRTT = this.RTO
         this.listBackoffRTT = []
+
+        //Control var
         this.packetLoss = false
+        this.isFirst = false
 
     }
 
@@ -47,6 +56,16 @@ export default class TCPSettings {
     calculateLossSegmentRTT(){
         return Math.floor(Math.random() * ((this.max + 10) - this.max + 1)) + (this.max+1); 
     }
+
+    calculateTcpRetransmision(){
+        this.R = this.calculateRTT()
+        this.RTTVAR = (1 - 0.25) * this.RTTVAR + 0.25 * Math.abs(this.SRTT - this.R);
+        this.SRTT = (1- 0.125) * this.SRTT + 0.125 * this.R;
+        let auxRTO = this.SRTT + Math.abs(6, 4*this.RTTVAR);
+        this.RTO = auxRTO.toFixed(2)
+        
+    }
+
     // TCP connection
     sendSynSegment(dstHost, simulation){
         console.log(`${this.hostName} envia a ${dstHost.hostName} paquete SYN:`);
@@ -77,9 +96,9 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         this.rtt = this.calculateRTT()
-        console.log(this.rtt)
+        this.calculateTcpRetransmision();
         dstHost.printSegment(dstHost.flagDst, this.ack, this.seq, 0)
-        simulation.push({date: this.rtt + ' ms', host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: this.RTO + ' ms', host: this.hostName, flag:dstHost.flagDst, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
 
     }
@@ -116,19 +135,21 @@ export default class TCPSettings {
                 dstHost.totalDstBytes = this.bytesToSend
             }
         }else{
-            if (dstHost.mss >= dstHost.window) {
-                this.bytesToSend = this.totalBytes
-                this.totalBytes -= this.bytesToSend // Resto el número de bytes enviados al total de bytes que tengo que enviar
-                dstHost.totalDstBytes = this.bytesToSend //Registro en el host destino los bytes que se envían en el segmento desde origen        
-       
-            }else{
+            console.log('else dstHost.mss >= dstHost.window'+dstHost.mss  +' '+dstHost.window)
+            if (this.totalBytes <= dstHost.window) {
                 this.bytesToSend = this.totalBytes;
                 this.totalBytes -= this.bytesToSend;
                 dstHost.totalDstBytes = this.bytesToSend
+
+            } else {
+                this.bytesToSend = dstHost.window;
+            this.totalBytes -= this.bytesToSend;
+            dstHost.totalDstBytes = this.bytesToSend
             }
-            
+
         }
-       
+        console.log('totalBytes: '+this.totalBytes +' this.bytesToSend: '+this.bytesToSend)
+
         dstHost.ackCountSlidindWindow = this.bytesToSend;
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
@@ -139,8 +160,8 @@ export default class TCPSettings {
     }
     
     sendBurstDataSegment(dstHost, simulation){
-        console.log(`${this.hostName} envia un paquete de datos a ${dstHost.hostName}`);
-    
+        console.log(`${this.hostName} envia un paquete de datos burst a ${dstHost.hostName}`);
+        console.log('this.totalBytes >= this.bytesToSend'+this.totalBytes +' '+this.bytesToSend)
         if (this.totalBytes >= this.bytesToSend) {
             this.totalBytes -= this.bytesToSend; // Resto el número de bytes enviados al total de bytes que tengo que enviar
             dstHost.totalDstBytes = this.bytesToSend; //Registro en el host destino los bytes que se envían en el segmento desde origen        
@@ -149,6 +170,8 @@ export default class TCPSettings {
             this.totalBytes -= this.bytesToSend;
             dstHost.totalDstBytes = this.bytesToSend
         }
+        console.log('totalBytes: '+this.totalBytes +' this.bytesToSend: '+this.bytesToSend)
+
         dstHost.ackCountSlidindWindow = this.bytesToSend;
         dstHost.ack += this.bytesToSend
         let time = new Date()
@@ -168,7 +191,8 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         let calRTT = this.calculateRTT()
-        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        this.calculateTcpRetransmision();
+        simulation.push({date: this.RTO + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
         dstHost.dstWindowCount = dstHost.dstWindow
     }
@@ -180,20 +204,18 @@ export default class TCPSettings {
         dstHost.printSegment(this.flagDst, this.ack, this.seq - this.bytesToSend, this.bytesToSend)
         if (this.packetLoss) {
             //newTimeout =  * Timeout
-            this.backoffRTT = this.rtt
-            this.listBackoffRTT.push(this.rtt)
-            let timeout = this.calculateLossSegmentRTT();
-            this.rtt = 2 * timeout
-            this.max = 2 * timeout
+            this.calculateTcpRetransmision();
+            this.backoffRTT = this.RTO
+            this.listBackoffRTT.push(this.RTO)
             this.packetLoss = false;
         }else{
             if(this.listBackoffRTT.length != 0){
-                this.rtt = this.listBackoffRTT.pop()
-                this.max = this.rtt
+                this.RTO = this.listBackoffRTT.pop()
+                this.max = this.RTO
             }
             
         }
-        simulation.push({date: this.rtt + ' ms', host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
+        simulation.push({date: this.RTO + ' ms', host: this.hostName, flag:this.flagDst, seq:this.seq - this.bytesToSend, ack:this.ack, bytes:this.bytesToSend})
     }
 
     sendAckSegment(dstHost, simulation){
@@ -206,7 +228,8 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         let calRTT = this.calculateRTT()
-        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        this.calculateTcpRetransmision();
+        simulation.push({date: this.RTO + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
         //console.log(simulation);
     }
 
@@ -229,7 +252,8 @@ export default class TCPSettings {
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
         let calRTT = this.calculateRTT()
-        simulation.push({date: calRTT + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        this.calculateTcpRetransmision();
+        simulation.push({date: this.RTO + ' ms', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack + 1, bytes:0})
         //console.log(simulation);
     }
 
@@ -240,7 +264,7 @@ export default class TCPSettings {
         this.printSegment(this.flag, this.ack, this.seq, 0)
         let time = new Date()
         this.srcTimer = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds()+':'+ time.getMilliseconds()
-        simulation.push({date: '-', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack, bytes:0})
+        simulation.push({date: '-', host: this.hostName, flag:this.flag, seq:this.seq, ack:this.ack + 1, bytes:0})
         //console.log(simulation);
     }
 

@@ -50,13 +50,13 @@
           ></v-progress-linear>
 
       <!-- Alerta de proceso finalizado correctamente -->
-      <v-alert :value="successProcess" type="success"> El host con IP {{this.hostIP}} está activo y respondiendo correctamente.</v-alert>
+      <v-alert :value="successProcess" type="success" class="mt-2"> El host con IP {{this.hostIP}} está activo y respondiendo correctamente.</v-alert>
 
       <!-- Alerta de cancelación de proceso -->
-      <v-alert :value="alert" type="error"> Proceso cancelado.</v-alert>
+      <v-alert :value="alert" type="error"  class="mt-2"> Proceso cancelado.</v-alert>
 
       <!-- Alerta de proceso Inactivo -->
-      <v-alert :value="errorPing" type="error"> Ha ocurrido un error con el host con IP {{this.hostIP}}. Comprueba si la IP es correcta, si lo es, es posible que el 
+      <v-alert :value="errorPing" type="error"  class="mt-2"> Ha ocurrido un error con el host con IP {{this.hostIP}}. Comprueba si la IP es correcta, si lo es, es posible que el 
         host no este activo. La causa puede ser debido a diferentes problemas, algunos pueden ser:
         <ul>
           <li>El host está apagado.</li>

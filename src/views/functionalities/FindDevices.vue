@@ -43,7 +43,7 @@
             <v-btn v-if="activeAction == accions[1]" color="success" class="mt-6 ml-5 " :disabled="!isCorrectIP" @click="ejecutarScanCompleto"> Ejecutar </v-btn>  
           </v-row>
           <!-- Table -->   
-      <v-card >
+      <v-card class="mt-6" >
         <v-card-title>
           Dispositivos encontrados 
           <v-spacer></v-spacer>

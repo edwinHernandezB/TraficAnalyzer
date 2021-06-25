@@ -92,7 +92,7 @@ export default {
       headers: [],
       desserts: [],   
       hideInfoAlert: true,
-      //----------Form Rules------------------
+      //----------Form Rules-------------------
       packetsRules: [
         v => {if(v < 1){this.nPackets = 1} return true},
       ],    

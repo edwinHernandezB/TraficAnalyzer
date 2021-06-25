@@ -56,7 +56,7 @@
         </v-row>
         
         <!--Alerta para mostrar resultado de resolver dominio de un IP-->
-        <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 2 && isIPToDomain" class="mt-1"
+        <v-alert v-if="auxAction == IP  && accions.indexOf(activeAction) == 2 && isIPToDomain" class="mt-5"
           border="left"
           color="light-blue lighten-2"
           dark>
@@ -80,7 +80,7 @@
         </v-row>
         
         <!--Alerta para mostrar resultado de resolver IP de un dominio-->
-        <v-alert v-if="auxAction == domain  && accions.indexOf(activeAction) == 3 && isDomainNull" class="mt-1"
+        <v-alert v-if="auxAction == domain  && accions.indexOf(activeAction) == 3 && isDomainNull" class="mt-5"
           border="left"
           color="light-blue lighten-2"
           dark

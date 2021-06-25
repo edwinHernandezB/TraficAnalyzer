@@ -3,8 +3,37 @@
   <v-app-bar  app clipped-left elevation="0" class="vAppBar" height="40" >
     <h4>Simulación TCP</h4>
   </v-app-bar>
-  <v-container  class="mt-5">
+  <v-container fluid class="mt-5">
+    
     <v-row>
+      <!-- Alert Info--->
+    <v-alert text v-if="hideInfoAlert" color="info" class="mt-2  ml-3">
+      <h4> Información sobre esta funcionalidad </h4>
+
+      <div>
+        La simulación TCP tiene como objetivo simular situaciones prácticas de envio y recepción de segmentos TCP, el formato en el cual es mostrado 
+        es similar al que se ha impartido en clases, con los campos respectivos que se pueden modificar por parte del usuario para ver cómo pueden
+        afectar en la transmisión de los segmentos.
+        <br>
+        <br>
+        La simulación utiliza un <strong>algoritmo de retransmisión adaptativo</strong>  que calcula el RTT a partir de las formulas indicadas en el
+        <a href="https://datatracker.ietf.org/doc/html/rfc6298" target="_blank"><u><strong>RFC6298</strong></u></a>, junto con la politica del 
+        <strong>backoff del timeout.</strong>
+        <br><br>
+      
+        La simulación contiene los siguientes campmos
+        <ul>
+          <li><strong>Tamaño máximo de segmento (MSS): </strong> Determina la cantidad de bytes que se pueden enviar en el cuerpo del segmento.</li>
+          <li><strong>Ventana: </strong> Controla la cantidad de bytes que aún están libres en el buffer de recepción del host destino, evitando sobrecargarlo de
+          trabajo a la hora de procesar los datos.</li>
+          <li><strong>Nº Bytes a enviar: </strong> Total de bytes a enviar al host destino.</li>
+          <li><strong>Rount Trip Time (RTT): </strong>  Tiempo que tarda un paquete en ir y volver al origen habiendo pasado por el destino. </li>
+        </ul>
+            
+      </div>
+      <v-btn class="mt-1" color="info"  @click="hideInfoAlert = !hideInfoAlert" outlined>Aceptar</v-btn>
+    </v-alert>
+
       <v-col>
    <v-row cols="12" >
           <v-text-field dense type="number" v-model="hostAMss" :rules="rulesHostA"  label="Maximum Size Segment (MSS)" required></v-text-field>
@@ -52,6 +81,7 @@
         item-key="id" show-select class="elevation-1">    
       </v-data-table>
   </v-container>
+  
 </v-container>
 </template>
 
@@ -78,6 +108,7 @@ export default {
         v => {if(v > 1){this.tasaPerdida = 1} return true},
       ],
       
+      hideInfoAlert: true,
       //Host A
       hostAMss: 0,
       hostAWindow: 0,
@@ -89,6 +120,8 @@ export default {
       hostBBytesTotales: 0,
       rttB: 0,
       tasaPerdida: 0,
+
+      startHostB: false,
 
       startColor: 'success',
       pauseColor: 'warning',
@@ -107,7 +140,7 @@ export default {
           sortable: false,
           value: 'num',
         },
-         { text: 'Time (HH:MM:SS:MS)', value: 'date' },
+         { text: 'RTT', value: 'date' },
          { text: 'Host', value: 'host' },
          { text: 'Flags', value: 'flag' },
          { text: 'Sequence', value: 'seq' },
@@ -139,14 +172,17 @@ export default {
     }
   },
   methods: {
-   
+    endSimulation(){
+        this.startSimulation = 'Comenzar'
+        this.startColor = 'success'
+    },
     lossPacket: function(HostA, HostB, simulation, lossRate){  
       console.log('sdsadsadsad' + lossRate)    
       if (Math.random() <= lossRate) {
           HostA.sendLossDataSegment(HostB, simulation) 
           HostA.packetLoss = true
           this.lossPacket(HostA, HostB, simulation, lossRate)
-      }else{
+        }else{
           HostB.sendAckSegment(HostA, simulation)
       }
     },
@@ -191,10 +227,16 @@ export default {
         let HostB = new TCPSettings(Math.floor(Math.random() * 101), parseInt(this.hostBMss), parseInt(this.hostBWindow), parseInt(this.hostBBytesTotales), 'Host B', parseInt(this.rttB))//seq, mss, window, totalBytes
 
         //TCP conection
-        HostA.sendSynSegment(HostB, this.simulation);
-        HostB.sendSynAck(HostA, this.simulation);
-        HostA.sendAck(HostB, this.simulation);
-
+        if (HostA.totalBytes != 0) {
+            HostA.sendSynSegment(HostB, this.simulation);
+            HostB.sendSynAck(HostA, this.simulation);
+            HostA.sendAck(HostB, this.simulation);  
+            HostA.isFirst = true      
+        } else {
+            HostB.sendSynSegment(HostA, this.simulation);
+            HostA.sendSynAck(HostB, this.simulation);
+            HostB.sendAck(HostA, this.simulation);
+        }
 
         let timer = async ()=>{
         
@@ -219,13 +261,13 @@ export default {
                   if (Math.random() >= 0.5) {
                       if (HostA.totalBytes != 0) {                
                           HostA.sendDataSegment(HostB, this.simulation)
-                          this.lossPacket(HostA, HostB, this.simulation, 0.8)    
+                          this.lossPacket(HostA, HostB, this.simulation, this.tasaPerdida)    
                       }
                   }
                   else{
                       if (HostB.totalBytes != 0) {                
                           HostB.sendDataSegment(HostA, this.simulation)
-                          this.lossPacket(HostB, HostA, this.simulation, 0.8)
+                          this.lossPacket(HostB, HostA, this.simulation, this.tasaPerdida)
                       }
                   }
               }
@@ -235,11 +277,20 @@ export default {
       }
 
         let finish = ()=>{
-            HostA.sendFinSegment(HostB, this.simulation)
-            HostB.sendFinAckSegment(HostA, this.simulation)
-            HostA.sendCloseConnection(HostB, this.simulation)
+          if (HostA.isFirst) {
+              HostA.sendFinSegment(HostB, this.simulation)
+              HostB.sendFinAckSegment(HostA, this.simulation)
+              HostA.sendCloseConnection(HostB, this.simulation)
+          } else {
+              HostB.sendFinSegment(HostA, this.simulation)
+              HostA.sendFinAckSegment(HostB, this.simulation)
+              HostB.sendCloseConnection(HostA, this.simulation)
+          }
+            
         }
         timer()
+ 
+
 
 
         let index = 0
@@ -258,7 +309,7 @@ export default {
             this.table.push({num: index, date: simulation[index].date, host: simulation[index].host, flag: simulation[index].flag, seq: simulation[index].seq,
             ack: simulation[index].ack, bytes: simulation[index].bytes })
             index++;
-            index < simulation.length ? setTimeout(()=>timer2(simulation, index), 1000) : 0
+            index < simulation.length ? setTimeout(()=>timer2(simulation, index), 1000) : this.endSimulation()
           }
         }
         timer2(this.simulation, index)

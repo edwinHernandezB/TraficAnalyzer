@@ -1,20 +1,2 @@
-18:08:36.871229 IP (tos 0x0, ttl 64, id 51392, offset 0, flags [DF], proto ICMP (1), length 84)
-    192.168.1.140 > 80.80.80.80: ICMP echo request, id 530, seq 3, length 64
-18:08:36.936558 IP (tos 0x0, ttl 52, id 0, offset 0, flags [DF], proto ICMP (1), length 84)
-    80.80.80.80 > 192.168.1.140: ICMP echo reply, id 530, seq 3, length 64
-18:08:37.872607 IP (tos 0x0, ttl 64, id 51543, offset 0, flags [DF], proto ICMP (1), length 84)
-    192.168.1.140 > 80.80.80.80: ICMP echo request, id 530, seq 4, length 64
-18:08:37.988726 IP (tos 0x0, ttl 52, id 0, offset 0, flags [DF], proto ICMP (1), length 84)
-    80.80.80.80 > 192.168.1.140: ICMP echo reply, id 530, seq 4, length 64
-18:08:38.873705 IP (tos 0x0, ttl 64, id 51571, offset 0, flags [DF], proto ICMP (1), length 84)
-    192.168.1.140 > 80.80.80.80: ICMP echo request, id 530, seq 5, length 64
-18:08:38.940248 IP (tos 0x0, ttl 52, id 0, offset 0, flags [DF], proto ICMP (1), length 84)
-    80.80.80.80 > 192.168.1.140: ICMP echo reply, id 530, seq 5, length 64
-18:08:39.875165 IP (tos 0x0, ttl 64, id 51651, offset 0, flags [DF], proto ICMP (1), length 84)
-    192.168.1.140 > 80.80.80.80: ICMP echo request, id 530, seq 6, length 64
-18:08:39.950046 IP (tos 0x0, ttl 52, id 0, offset 0, flags [DF], proto ICMP (1), length 84)
-    80.80.80.80 > 192.168.1.140: ICMP echo reply, id 530, seq 6, length 64
-18:08:40.875324 IP (tos 0x0, ttl 64, id 51704, offset 0, flags [DF], proto ICMP (1), length 84)
-    192.168.1.140 > 80.80.80.80: ICMP echo request, id 530, seq 7, length 64
-18:08:40.941159 IP (tos 0x0, ttl 52, id 0, offset 0, flags [DF], proto ICMP (1), length 84)
-    80.80.80.80 > 192.168.1.140: ICMP echo reply, id 530, seq 7, length 64
+14:21:38.519459 IP (tos 0x0, ttl 64, id 22945, offset 0, flags [DF], proto ICMP (1), length 84)
+    192.168.1.41 > 80.80.80.80: ICMP echo request, id 621, seq 3, length 64

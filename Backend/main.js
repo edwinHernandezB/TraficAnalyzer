@@ -293,14 +293,14 @@ app.get('/capturePackage', function(req, res){
     console.log(req.query.typeOfPacket);
     console.log(req.query.nPackets);
     let packetType = 'tcp'
-    cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' 1> /dev/null > tcpdump.txt'
+    cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' > tcpdump.txt'
 
     if (req.query.typeOfPacket == 1) {
         packetType = 'udp'
-        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' ' + packetType + ' 1> /dev/null > tcpdump.txt'
+        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' ' + packetType + ' > tcpdump.txt'
     }else if(req.query.typeOfPacket == 2){
         packetType = 'icmp'
-        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' 1> /dev/null > tcpdump.txt'
+        cmdShell = 'tcpdump -nn -c '+ req.query.nPackets + ' -v ' + packetType + ' > tcpdump.txt'
     }
 
     exec(cmdShell,(err,stdout,stderr)=>{

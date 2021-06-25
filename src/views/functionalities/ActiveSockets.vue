@@ -39,7 +39,7 @@
       </v-row>
 
       <!-- Estadisticas  -->
-      <v-container fluid v-if="showStatistics">
+      <v-container fluid  v-if="showStatistics">
         <v-row>
           
           <!-- Total de conexiones  -->
