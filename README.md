@@ -4,7 +4,7 @@ Program designed for the management and administration of network data using dif
 
 ## The application has not been fully designed 
 
-<img src="/public/1.png" alt="My cool logo" width="860px" height="860px" /> 
+<img src="/public/1.png" alt="My cool logo" /> 
 <img src="/public/2.png" alt="My cool logo"/> 
 <img src="/public/3.png" alt="My cool logo"/> 
 <img src="/public/4.png" alt="My cool logo"/> 
